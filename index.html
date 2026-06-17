@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala Braden Q</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 1.75rem; }
+  header h1 { font-size: 20px; font-weight: 600; color: #1a1a1a; }
+  header p { font-size: 12px; color: #888; margin-top: 4px; }
+
+  .section-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #888;
+    margin: 1.5rem 0 0.6rem; padding-bottom: 6px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  /* ── DESKTOP ── */
+  .bq-row {
+    display: grid;
+    grid-template-columns: 130px repeat(4, 1fr);
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .bq-label {
+    background: #f9f9f7;
+    padding: 12px;
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 1px solid #e0e0e0;
+  }
+  .bq-label-name { font-weight: 600; font-size: 12px; color: #1a1a1a; }
+  .bq-label-desc { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
+
+  /* La opción es un <label> nativo: el toque lo maneja el navegador */
+  .bq-cell {
+    position: relative;
+    display: block;
+    padding: 10px;
+    border-right: 1px solid #e0e0e0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(99,153,34,0.1);
+  }
+  .bq-cell:last-child { border-right: none; }
+  .bq-cell input {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+    pointer-events: none;
+  }
+  .bq-cell:hover { background: #f5f9ee; }
+  .bq-cell.selected { background: #eaf3de; }
+
+  .bq-score {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    border-radius: 99px; padding: 1px 8px; margin-bottom: 5px;
+    background: #f0f0ee; color: #888;
+  }
+  .bq-cell.selected .bq-score { background: #639922; color: #fff; }
+  .bq-cell-title { font-weight: 600; font-size: 11.5px; color: #1a1a1a; margin-bottom: 5px; line-height: 1.3; }
+  .bq-cell-body { font-size: 11px; color: #2a5f8f; line-height: 1.5; }
+  .bq-check { display: none; }
+
+  /* ── MÓVIL ── */
+  @media (max-width: 640px) {
+    .bq-row { grid-template-columns: 1fr; }
+    .bq-label {
+      border-right: none; border-bottom: 1px solid #e0e0e0;
+      padding: 10px 14px; background: #f0f0ee;
+    }
+    .bq-label-name { font-size: 13px; }
+    .bq-cell {
+      border-right: none; border-bottom: 1px solid #e0e0e0;
+      padding: 14px;
+      display: flex; align-items: flex-start; gap: 10px;
+      min-height: 56px;
+    }
+    .bq-cell:last-child { border-bottom: none; }
+    .bq-cell:active { background: #f5f9ee; }
+    .bq-cell.selected { background: #eaf3de; }
+    .bq-score { flex-shrink: 0; margin-bottom: 0; margin-top: 2px; font-size: 11px; padding: 3px 10px; }
+    .bq-cell-content { flex: 1; }
+    .bq-cell-title { font-size: 13px; margin-bottom: 4px; }
+    .bq-cell-body { font-size: 12px; }
+    .bq-check {
+      display: flex; flex-shrink: 0;
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1.5px solid #ccc; margin-top: 2px;
+      align-items: center; justify-content: center;
+      font-size: 13px; color: transparent; background: transparent;
+      transition: all 0.15s;
+    }
+    .bq-cell.selected .bq-check {
+      background: #639922; border-color: #639922; color: #fff;
+    }
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    margin-top: 1.25rem; padding: 14px 18px;
+    background: #fff; border-radius: 8px; border: 1px solid #e0e0e0;
+  }
+  .footer-left { display: flex; align-items: baseline; gap: 12px; }
+  .total-label { font-size: 13px; color: #888; }
+  .total-score { font-size: 26px; font-weight: 600; color: #1a1a1a; }
+  .risk-badge { font-size: 12px; font-weight: 600; padding: 5px 16px; border-radius: 99px; display: none; }
+  .reset-btn {
+    font-size: 13px; cursor: pointer; color: #aaa;
+    background: none; border: none; text-decoration: underline;
+    padding: 8px 0; min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .legend { display: flex; gap: 16px; margin-top: 0.75rem; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #666; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .note { font-size: 11px; color: #aaa; margin-top: 1.25rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Escala Braden Q</h1>
+    <p>Evaluación de riesgo de úlceras por presión en pediatría</p>
+  </header>
+
+  <form id="bq-form">
+
+  <div class="section-title">Intensidad y duración de la presión</div>
+
+  <!-- MOVILIDAD -->
+  <div class="bq-row" data-domain="movilidad">
+    <div class="bq-label">
+      <span class="bq-label-name">Movilidad</span>
+      <span class="bq-label-desc">Capacidad para cambiar y controlar la posición del cuerpo</span>
+    </div>
+    <label class="bq-cell">
+      <input type="radio" name="movilidad" value="1">
+      <span class="bq-score">1 pt</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Completamente inmóvil</div>
+        <div class="bq-cell-body">No realiza ningún movimiento con el cuerpo o las extremidades sin ayuda.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="movilidad" value="2">
+      <span class="bq-score">2 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Muy limitada</div>
+        <div class="bq-cell-body">Ocasionalmente realiza ligeros cambios en la posición del cuerpo o de las extremidades, pero no es capaz de realizar cambios frecuentes o significativos sin ayuda.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="movilidad" value="3">
+      <span class="bq-score">3 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Ligeramente limitada</div>
+        <div class="bq-cell-body">Realiza frecuentes aunque ligeros cambios en la posición del cuerpo o de las extremidades sin ayuda.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="movilidad" value="4">
+      <span class="bq-score">4 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Sin limitaciones</div>
+        <div class="bq-cell-body">Realiza importantes y frecuentes cambios de posición sin ayuda.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+  </div>
+
+  <!-- ACTIVIDAD -->
+  <div class="bq-row" data-domain="actividad">
+    <div class="bq-label">
+      <span class="bq-label-name">Actividad</span>
+      <span class="bq-label-desc">Nivel de actividad física</span>
+    </div>
+    <label class="bq-cell">
+      <input type="radio" name="actividad" value="1">
+      <span class="bq-score">1 pt</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Encamado</div>
+        <div class="bq-cell-body">Limitado/a a la cama.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="actividad" value="2">
+      <span class="bq-score">2 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">En silla</div>
+        <div class="bq-cell-body">Capacidad para caminar severamente limitada o inexistente. No puede soportar su propio peso y/o hay que ayudarle para sentarse en una silla o en una silla de ruedas.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="actividad" value="3">
+      <span class="bq-score">3 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Camina ocasionalmente</div>
+        <div class="bq-cell-body">Camina ocasionalmente durante el día, pero distancias muy cortas, con o sin ayuda. Pasa la mayor parte de cada turno en la cama o en la silla.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="actividad" value="4">
+      <span class="bq-score">4 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Paciente demasiado joven / camina frecuentemente</div>
+        <div class="bq-cell-body">Camina fuera de la habitación al menos dos veces al día y dentro de la habitación al menos una vez cada dos horas durante las horas de paseo.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+  </div>
+
+  <!-- PERCEPCIÓN -->
+  <div class="bq-row" data-domain="percepcion">
+    <div class="bq-label">
+      <span class="bq-label-name">Percepción sensorial</span>
+      <span class="bq-label-desc">Capacidad de responder adecuadamente al discomfort relacionado con la presión, según su nivel de desarrollo</span>
+    </div>
+    <label class="bq-cell">
+      <input type="radio" name="percepcion" value="1">
+      <span class="bq-score">1 pt</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Completamente limitada</div>
+        <div class="bq-cell-body">No responde a estímulos dolorosos (no gime, no se estremece ni se agarra) debido a un bajo nivel de conciencia o a sedación. O capacidad limitada para sentir dolor en la mayor parte del cuerpo.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="percepcion" value="2">
+      <span class="bq-score">2 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Muy limitada</div>
+        <div class="bq-cell-body">Responde sólo a estímulos dolorosos. Incapacidad para comunicar malestar, excepto gimiendo o mostrando inquietud. O tiene alguna alteración sensorial que limita la capacidad de sentir dolor o malestar en más de la mitad del cuerpo.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="percepcion" value="3">
+      <span class="bq-score">3 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Ligeramente limitada</div>
+        <div class="bq-cell-body">Responde a órdenes verbales, pero no siempre puede comunicar la incomodidad o la necesidad de ser cambiado de postura. O tiene alguna alteración sensorial que limita la capacidad de sentir dolor o malestar en una o dos extremidades.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="percepcion" value="4">
+      <span class="bq-score">4 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Sin limitaciones</div>
+        <div class="bq-cell-body">Responde a órdenes verbales. No tiene ninguna alteración sensorial que limite su capacidad de sentir o comunicar dolor o malestar.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+  </div>
+
+  <div class="section-title" style="margin-top:2rem">Tolerancia de la piel y la estructura de soporte</div>
+
+  <!-- HUMEDAD -->
+  <div class="bq-row" data-domain="humedad">
+    <div class="bq-label">
+      <span class="bq-label-name">Humedad</span>
+      <span class="bq-label-desc">Nivel de exposición de la piel a la humedad</span>
+    </div>
+    <label class="bq-cell">
+      <input type="radio" name="humedad" value="1">
+      <span class="bq-score">1 pt</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Piel constantemente húmeda</div>
+        <div class="bq-cell-body">La piel se mantiene húmeda casi permanentemente debido a la transpiración, orina, drenaje, etc. La humedad es detectada cada vez que se gira o mueve al paciente.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="humedad" value="2">
+      <span class="bq-score">2 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Piel muy húmeda</div>
+        <div class="bq-cell-body">La piel está húmeda a menudo, pero no siempre. La ropa de cama debe ser cambiada al menos cada 8 horas.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="humedad" value="3">
+      <span class="bq-score">3 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Piel ocasionalmente húmeda</div>
+        <div class="bq-cell-body">La piel está húmeda de forma ocasional, necesitando cambio de la ropa de cama cada 12 horas.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="humedad" value="4">
+      <span class="bq-score">4 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Piel raramente húmeda</div>
+        <div class="bq-cell-body">La piel está casi siempre seca. Hay que cambiar los pañales de forma rutinaria; la ropa de cama solo hay que cambiarla cada 24 horas.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+  </div>
+
+  <!-- FRICCIÓN -->
+  <div class="bq-row" data-domain="friccion">
+    <div class="bq-label">
+      <span class="bq-label-name">Fricción y cizallamiento</span>
+      <span class="bq-label-desc">Fricción: la piel se mueve contra la superficie de apoyo. Cizallamiento: la piel y la superficie ósea adyacente rozan la una contra la otra.</span>
+    </div>
+    <label class="bq-cell">
+      <input type="radio" name="friccion" value="1">
+      <span class="bq-score">1 pt</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Problema significativo</div>
+        <div class="bq-cell-body">La espasticidad, contracturas, picores o agitación le llevan a un movimiento y fricción casi constantes.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="friccion" value="2">
+      <span class="bq-score">2 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Problema</div>
+        <div class="bq-cell-body">Requiere ayuda de moderada a máxima para moverse. Es imposible levantarle completamente sin que se produzca un roce contra las sábanas. Frecuentemente se desliza hacia abajo en la cama o en la silla, necesitando recolocarle con la máxima ayuda.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="friccion" value="3">
+      <span class="bq-score">3 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Problema potencial</div>
+        <div class="bq-cell-body">Se mueve débilmente o necesita una ayuda mínima. Mientras se mueve, es posible que la piel roce de algún modo con las sábanas, la silla u otros dispositivos. La mayor parte del tiempo mantiene una posición relativamente buena en la silla o cama, aunque ocasionalmente se desliza hacia abajo.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="friccion" value="4">
+      <span class="bq-score">4 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Sin problema aparente</div>
+        <div class="bq-cell-body">Es posible levantarle completamente durante un cambio de postura. Se mueve independientemente en la cama y en la silla, y tiene suficiente fuerza muscular para levantarse completamente mientras se mueve. Mantiene una buena postura en la cama o en la silla en todo momento.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+  </div>
+
+  <!-- NUTRICIÓN -->
+  <div class="bq-row" data-domain="nutricion">
+    <div class="bq-label">
+      <span class="bq-label-name">Nutrición</span>
+      <span class="bq-label-desc">Patrón habitual de ingesta de alimentos</span>
+    </div>
+    <label class="bq-cell">
+      <input type="radio" name="nutricion" value="1">
+      <span class="bq-score">1 pt</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Muy pobre</div>
+        <div class="bq-cell-body">Está en ayunas o a dieta líquida, o con sueroterapia más de 5 días. O albúmina &lt;2,5 mg/dl. O nunca come una comida completa. Raras veces come más de la mitad de cualquier comida ofrecida. La ingesta de proteínas incluye 2 o menos raciones de carne, pescado o productos lácteos al día. Toma pocos líquidos. No toma un suplemento dietético líquido.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="nutricion" value="2">
+      <span class="bq-score">2 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Inadecuada</div>
+        <div class="bq-cell-body">Se le administra una nutrición enteral (SNG) o nutrición parenteral (IV) que le proporciona una cantidad inadecuada de calorías y minerales para su edad. O albúmina &lt;3 mg/dl. O raras veces come una comida completa y generalmente sólo come la mitad de cualquier comida ofrecida. La ingesta de proteínas incluye sólo 3 raciones de carne, pescado o productos lácteos al día. Ocasionalmente toma un suplemento dietético.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="nutricion" value="3">
+      <span class="bq-score">3 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Adecuada</div>
+        <div class="bq-cell-body">Se le administra una nutrición enteral (SNG) o nutrición parenteral (IV) que le proporciona una cantidad adecuada de calorías y minerales para su edad. O come la mitad de la mayoría de las comidas. Come un total de 4 raciones de proteínas al día (carne, pescado, productos lácteos). Ocasionalmente rechaza una comida, pero normalmente toma un suplemento si se le ofrece.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="nutricion" value="4">
+      <span class="bq-score">4 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Excelente</div>
+        <div class="bq-cell-body">Toma una dieta normal que le proporciona las calorías adecuadas para su edad. Come/bebe la mayor parte de cada comida/toma. Nunca rechaza una comida. Normalmente come un total de 4 o más raciones de carne, pescados o productos lácteos al día. Ocasionalmente come entre comidas. No necesita suplementos.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+  </div>
+
+  <!-- PERFUSIÓN -->
+  <div class="bq-row" data-domain="perfusion">
+    <div class="bq-label">
+      <span class="bq-label-name">Perfusión tisular y oxigenación</span>
+    </div>
+    <label class="bq-cell">
+      <input type="radio" name="perfusion" value="1">
+      <span class="bq-score">1 pt</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Muy comprometida</div>
+        <div class="bq-cell-body">Hipotensión (TAm &lt;50 mmHg; &lt;40 en recién nacidos). O el paciente no tolera fisiológicamente los cambios posturales.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="perfusion" value="2">
+      <span class="bq-score">2 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Comprometida</div>
+        <div class="bq-cell-body">Normotenso; el pH sérico es &lt;7,40; la saturación de oxígeno puede ser &lt;95% O la hemoglobina puede ser &lt;10 mg/dl O el relleno capilar puede ser &gt;2 segundos.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="perfusion" value="3">
+      <span class="bq-score">3 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Adecuada</div>
+        <div class="bq-cell-body">Normotenso; el pH de la sangre es normal; la saturación de oxígeno puede ser &lt;95% O la hemoglobina puede ser &lt;10 mg/dl O el relleno capilar puede ser &gt;2 segundos.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+    <label class="bq-cell">
+      <input type="radio" name="perfusion" value="4">
+      <span class="bq-score">4 pts</span>
+      <div class="bq-cell-content">
+        <div class="bq-cell-title">Excelente</div>
+        <div class="bq-cell-body">Normotenso; la saturación de oxígeno es &gt;95%; hemoglobina normal; y el relleno capilar &lt;2 segundos.</div>
+      </div>
+      <span class="bq-check">✓</span>
+    </label>
+  </div>
+
+  </form>
+
+  <div class="footer">
+    <div class="footer-left">
+      <span class="total-label">Puntaje total</span>
+      <span class="total-score" id="total">— / 28</span>
+    </div>
+    <div id="risk-badge" class="risk-badge"></div>
+    <button type="button" class="reset-btn" id="reset-btn">Reiniciar</button>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#e24b4a"></div> ≤16 pts — Riesgo alto</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef9f27"></div> 17–21 pts — Riesgo moderado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#639922"></div> 22–28 pts — Riesgo bajo</div>
+  </div>
+
+  <p class="note">© Quigley S &amp; Curley M. 1996 &nbsp;·&nbsp; Versión en castellano: Quesada C. 2009</p>
+</div>
+
+<script>
+  var form = document.getElementById('bq-form');
+
+  function recompute() {
+    var checked = form.querySelectorAll('input[type=radio]:checked');
+    var labels = form.querySelectorAll('.bq-cell');
+    for (var i = 0; i < labels.length; i++) { labels[i].classList.remove('selected'); }
+
+    var total = 0;
+    for (var j = 0; j < checked.length; j++) {
+      total += parseInt(checked[j].value, 10);
+      checked[j].closest('.bq-cell').classList.add('selected');
+    }
+
+    var totalEl = document.getElementById('total');
+    var badge = document.getElementById('risk-badge');
+
+    if (checked.length === 0) {
+      totalEl.textContent = '— / 28';
+      badge.style.display = 'none';
+      return;
+    }
+
+    totalEl.textContent = total + ' / 28';
+    badge.style.display = 'inline-block';
+    if (total <= 16) {
+      badge.textContent = 'Riesgo alto';
+      badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
+    } else if (total <= 21) {
+      badge.textContent = 'Riesgo moderado';
+      badge.style.background = '#faeeda'; badge.style.color = '#854f0b';
+    } else {
+      badge.textContent = 'Riesgo bajo';
+      badge.style.background = '#eaf3de'; badge.style.color = '#3b6d11';
+    }
+  }
+
+  // El evento 'change' de los radios es 100% confiable en iPhone/Safari
+  form.addEventListener('change', recompute);
+
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    form.reset();
+    recompute();
+  });
+</script>
+</body>
+</html>
