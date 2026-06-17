@@ -132,6 +132,56 @@
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #666; }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .note { font-size: 11px; color: #aaa; margin-top: 1.25rem; text-align: center; }
+
+  /* ── PLAN DE CUIDADOS ── */
+  .care-btn {
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    padding: 7px 16px; border-radius: 99px; border: none;
+    background: #1a1a1a; color: #fff;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .care-btn:active { opacity: 0.75; }
+
+  .care-panel {
+    margin-top: 1rem;
+    border-radius: 10px; border: 1px solid #e0e0e0;
+    overflow: hidden; background: #fff;
+  }
+  .care-panel-header {
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .care-panel-header h2 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .care-panel-badge { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 99px; }
+
+  .care-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0;
+  }
+  .care-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f0f0ee;
+    border-right: 1px solid #f0f0ee;
+  }
+  .care-item-title {
+    font-size: 11px; font-weight: 600; color: #1a1a1a;
+    margin-bottom: 6px; text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .care-item ul { padding-left: 0; list-style: none; margin: 0; }
+  .care-item li {
+    font-size: 12px; color: #444; line-height: 1.5;
+    padding-left: 14px; position: relative;
+    margin-bottom: 3px;
+  }
+  .care-item li::before {
+    content: '·'; position: absolute; left: 4px; color: #aaa;
+  }
+  .care-item li.note-item { color: #888; font-style: italic; }
+  .care-item li.note-item::before { content: ''; }
 </style>
 </head>
 <body>
@@ -462,9 +512,14 @@
       <span class="total-label">Puntaje total</span>
       <span class="total-score" id="total">— / 28</span>
     </div>
-    <div id="risk-badge" class="risk-badge"></div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div id="risk-badge" class="risk-badge"></div>
+      <button type="button" id="care-btn" class="care-btn" style="display:none" onclick="toggleCare()">Ver plan de cuidados</button>
+    </div>
     <button type="button" class="reset-btn" id="reset-btn">Reiniciar</button>
   </div>
+
+  <div id="care-panel" class="care-panel" style="display:none"></div>
 
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#e24b4a"></div> ≤16 pts — Riesgo alto</div>
@@ -477,6 +532,96 @@
 
 <script>
   var form = document.getElementById('bq-form');
+  var currentRisk = null;
+  var careOpen = false;
+
+  var carePlans = {
+    bajo: {
+      label: 'Riesgo bajo',
+      badgeBg: '#eaf3de', badgeColor: '#3b6d11',
+      items: [
+        { title: 'Reevaluación del riesgo', points: ['c/12 horas'] },
+        { title: 'Reevaluación del estado de la piel', points: ['c/24 horas'] },
+        { title: 'Cambios posturales / alivio de presión', points: ['Según necesidad', 'Uso de superficies de apoyo y alivio de presión: almohadones, cojines, cuñas y películas protectoras'] },
+        { title: 'Colchón SEMP', points: ['Colchón de aire alternante o flotación seca (opcional)', 'Revisar funcionalidad del SEMP 2 veces al día (1 vez por turno)'] },
+        { title: 'Protección de talones, codos y zona sacra', points: ['Si es necesario: espuma multicapa en talones, codos y zona sacra'], notes: ['En paciente neonatal: No aplica'] },
+        { title: 'Baño', points: ['Diario / demanda'] },
+        { title: 'Hidratación de la piel', points: ['Crema hidratante c/24 horas'] },
+        { title: 'Lubricación de la piel', points: ['En neonatos: vaselina líquida'] },
+        { title: 'Sedestación (si lo permite la condición)', points: ['4 horas máximo'] },
+        { title: 'Evaluación nutricional', points: ['No requerida en riesgo bajo'] }
+      ]
+    },
+    moderado: {
+      label: 'Riesgo moderado',
+      badgeBg: '#faeeda', badgeColor: '#854f0b',
+      items: [
+        { title: 'Reevaluación del riesgo', points: ['c/12 horas'] },
+        { title: 'Reevaluación del estado de la piel', points: ['c/12 horas'] },
+        { title: 'Cambios posturales / alivio de presión', points: ['c/4 horas alternando zonas de apoyo y lateralidad', 'Uso de superficies de apoyo y alivio de presión: almohadones, cojines, cuñas y películas protectoras'] },
+        { title: 'Colchón SEMP', points: ['Colchón de aire alternante o flotación seca', 'Revisar funcionalidad del SEMP 2 veces al día (1 vez por turno)'], notes: ['En paciente neonatal: No aplica'] },
+        { title: 'Protección de talones, codos y zona sacra', points: ['Espuma multicapa en talones, codos y zona sacra'], notes: ['En paciente neonatal: No aplica'] },
+        { title: 'Baño', points: ['Diario / demanda'] },
+        { title: 'Hidratación de la piel', points: ['Crema hidratante c/24 horas'] },
+        { title: 'Lubricación de la piel', points: ['Ácidos grasos hiperoxigenados en zonas de mayor riesgo c/12 horas'] },
+        { title: 'Sedestación (si lo permite la condición)', points: ['4 horas máximo con espuma multicapa en sacro'], notes: ['Paciente pediátrico y neonatal: estimular mantener en brazos por los padres'] },
+        { title: 'Evaluación nutricional', points: ['Valoración nutricional'], notes: ['Paciente neonatal: no aplica'] }
+      ]
+    },
+    alto: {
+      label: 'Riesgo alto',
+      badgeBg: '#fcebeb', badgeColor: '#a32d2d',
+      items: [
+        { title: 'Reevaluación del riesgo', points: ['c/12 horas'] },
+        { title: 'Reevaluación del estado de la piel', points: ['c/8 horas'] },
+        { title: 'Cambios posturales / alivio de presión', points: ['c/2 horas alternando zonas de apoyo y lateralidad', 'Uso de superficies de apoyo y alivio de presión: almohadones, cojines, cuñas y películas protectoras'] },
+        { title: 'Colchón SEMP', points: ['Colchón de aire alternante o flotación seca (idealmente marca Roho ®)', 'Revisar funcionalidad del SEMP 2 veces al día (1 vez por turno)'] },
+        { title: 'Protección de talones, codos y zona sacra', points: ['Espuma multicapa en talones, codos y zona sacra'], notes: ['En paciente neonatal: instalar hidrocoloide en talones, codos y zona sacra'] },
+        { title: 'Baño', points: ['Diario / demanda'] },
+        { title: 'Hidratación de la piel', points: ['Crema hidratante c/24 horas'] },
+        { title: 'Lubricación de la piel', points: ['Ácidos grasos hiperoxigenados en zonas de mayor riesgo c/8 horas'] },
+        { title: 'Sedestación (si lo permite la condición)', points: ['2 horas máximo con espuma multicapa en sacro'], notes: ['Paciente pediátrico y neonatal: estimular mantener en brazos por los padres'] },
+        { title: 'Evaluación nutricional', points: ['Valoración nutricional'], notes: ['Paciente neonatal: no aplica'] }
+      ]
+    }
+  };
+
+  function buildCarePanel(risk) {
+    var plan = carePlans[risk];
+    var html = '<div class="care-panel-header">'
+      + '<h2>Plan de prevención de LPP</h2>'
+      + '<span class="care-panel-badge" style="background:' + plan.badgeBg + ';color:' + plan.badgeColor + '">' + plan.label + '</span>'
+      + '</div>'
+      + '<div class="care-grid">';
+    for (var i = 0; i < plan.items.length; i++) {
+      var item = plan.items[i];
+      html += '<div class="care-item"><div class="care-item-title">' + item.title + '</div><ul>';
+      for (var j = 0; j < item.points.length; j++) {
+        html += '<li>' + item.points[j] + '</li>';
+      }
+      if (item.notes) {
+        for (var k = 0; k < item.notes.length; k++) {
+          html += '<li class="note-item">' + item.notes[k] + '</li>';
+        }
+      }
+      html += '</ul></div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function toggleCare() {
+    var panel = document.getElementById('care-panel');
+    careOpen = !careOpen;
+    if (careOpen) {
+      panel.innerHTML = buildCarePanel(currentRisk);
+      panel.style.display = 'block';
+      document.getElementById('care-btn').textContent = 'Ocultar plan de cuidados';
+    } else {
+      panel.style.display = 'none';
+      document.getElementById('care-btn').textContent = 'Ver plan de cuidados';
+    }
+  }
 
   function recompute() {
     var checked = form.querySelectorAll('input[type=radio]:checked');
@@ -491,24 +636,43 @@
 
     var totalEl = document.getElementById('total');
     var badge = document.getElementById('risk-badge');
+    var careBtn = document.getElementById('care-btn');
+    var carePanel = document.getElementById('care-panel');
 
     if (checked.length === 0) {
       totalEl.textContent = '— / 28';
       badge.style.display = 'none';
+      careBtn.style.display = 'none';
+      carePanel.style.display = 'none';
+      careOpen = false;
+      currentRisk = null;
       return;
     }
 
     totalEl.textContent = total + ' / 28';
     badge.style.display = 'inline-block';
+    careBtn.style.display = 'inline-block';
+
+    var newRisk;
     if (total <= 16) {
+      newRisk = 'alto';
       badge.textContent = 'Riesgo alto';
       badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
     } else if (total <= 21) {
+      newRisk = 'moderado';
       badge.textContent = 'Riesgo moderado';
       badge.style.background = '#faeeda'; badge.style.color = '#854f0b';
     } else {
+      newRisk = 'bajo';
       badge.textContent = 'Riesgo bajo';
       badge.style.background = '#eaf3de'; badge.style.color = '#3b6d11';
+    }
+
+    if (newRisk !== currentRisk) {
+      currentRisk = newRisk;
+      if (careOpen) {
+        carePanel.innerHTML = buildCarePanel(currentRisk);
+      }
     }
   }
 
@@ -517,6 +681,8 @@
 
   document.getElementById('reset-btn').addEventListener('click', function() {
     form.reset();
+    careOpen = false;
+    document.getElementById('care-btn').textContent = 'Ver plan de cuidados';
     recompute();
   });
 </script>
