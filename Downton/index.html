@@ -21,6 +21,45 @@
   header h1 { font-size: 21px; font-weight: 600; color: #639922; }
   header p { font-size: 12px; color: #888; margin-top: 4px; }
 
+  /* ── SCALE NAV ── */
+  .scale-nav {
+    display: flex; gap: 4px;
+    background: #eceae8; border-radius: 12px;
+    padding: 5px; margin-bottom: 1.75rem;
+  }
+  .scale-nav-item {
+    flex: 1; text-align: center;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; color: #777;
+    text-decoration: none; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .scale-nav-item.active { background: #fff; color: #639922; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .scale-nav-item:not(.active):hover { color: #444; background: rgba(255,255,255,0.45); }
+
+  /* ── UNIT SWITCHER ── */
+  .unit-wrap { margin-bottom: 1.25rem; }
+  .unit-wrap-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: #888;
+    margin-bottom: 7px;
+  }
+  .unit-switcher {
+    display: flex; gap: 6px;
+    background: #ececea; border-radius: 10px;
+    padding: 5px;
+  }
+  .unit-btn {
+    flex: 1; border: none; background: transparent;
+    padding: 10px 8px; border-radius: 7px;
+    font-size: 12px; font-weight: 600; color: #777;
+    cursor: pointer; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1.3; text-align: center;
+  }
+  .unit-btn.active { background: #fff; color: #639922; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  /* ── FORM ROWS ── */
   .bq-row {
     display: grid;
     grid-template-columns: 210px 1fr;
@@ -74,7 +113,7 @@
   .bq-cell.is-cb .bq-check { border-radius: 5px; }
   .bq-cell.selected .bq-check { background: #639922; border-color: #639922; color: #fff; }
 
-  /* Override panel */
+  /* ── OVERRIDE PANEL ── */
   .override-panel {
     border: 1px solid #f0c8a0;
     border-radius: 8px;
@@ -113,14 +152,73 @@
   .override-cell-text { font-size: 12.5px; color: #444; flex: 1; }
   .override-cell.selected .override-cell-text { color: #8a2800; font-weight: 500; }
 
-  /* Info box */
+  /* ── CARE PLAN ── */
+  .care-btn {
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    padding: 7px 16px; border-radius: 99px; border: none;
+    background: #1a1a1a; color: #fff;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .care-btn:active { opacity: 0.75; }
+
+  .care-panel {
+    margin-top: 1rem;
+    border-radius: 10px; border: 1px solid #e0e0e0;
+    overflow: hidden; background: #fff;
+  }
+  .care-panel-header {
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .care-panel-header h2 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .care-panel-unit { font-size: 11px; color: #888; }
+  .care-panel-badge { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 99px; }
+
+  .copy-btn {
+    margin-left: auto; font-size: 12px; font-weight: 600; cursor: pointer;
+    padding: 5px 14px; border-radius: 99px; border: 1.5px solid #ccc;
+    background: #fff; color: #555;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .copy-btn:hover { border-color: #639922; color: #639922; }
+  .copy-btn.copied { border-color: #639922; background: #eaf3de; color: #3b6d11; }
+
+  .care-section {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f0f0ee;
+  }
+  .care-section:last-child { border-bottom: none; }
+  .care-section-title {
+    font-size: 10px; font-weight: 600; color: #aaa;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .care-measure {
+    display: grid; grid-template-columns: 200px 1fr; gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f5f5f3;
+    align-items: start;
+  }
+  .care-measure:last-child { border-bottom: none; padding-bottom: 0; }
+  .care-measure-name { font-size: 11.5px; font-weight: 600; color: #555; line-height: 1.4; }
+  .care-measure-value { font-size: 12px; color: #1a1a1a; line-height: 1.4; }
+  .care-measure-value.no { color: #aaa; }
+
+  .care-bullets { list-style: none; padding: 0; margin: 0; }
+  .care-bullets li {
+    font-size: 12px; color: #444; line-height: 1.5;
+    padding-left: 14px; position: relative; margin-bottom: 3px;
+  }
+  .care-bullets li::before { content: '·'; position: absolute; left: 4px; color: #aaa; }
+
+  /* ── MISC ── */
   .info-box {
-    background: #eef4fb;
-    border: 1px solid #c0d8f0;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 12px; color: #1a4070;
-    line-height: 1.55;
+    background: #eef4fb; border: 1px solid #c0d8f0;
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 12px; color: #1a4070; line-height: 1.55;
     margin-bottom: 1rem;
   }
   .info-box strong { color: #0f2d55; }
@@ -129,6 +227,13 @@
     font-size: 11px; color: #777; line-height: 1.55;
     margin-top: 0.75rem; padding: 10px 14px;
     background: #fafaf8; border-radius: 6px; border: 1px solid #e8e4dc;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #888;
+    margin: 1.25rem 0 0.6rem; padding-bottom: 6px;
+    border-bottom: 1px solid #e0e0e0;
   }
 
   .footer {
@@ -150,35 +255,15 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .section-label {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
-    text-transform: uppercase; color: #888;
-    margin: 1.25rem 0 0.6rem; padding-bottom: 6px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
   .legend { margin-top: 0.75rem; font-size: 11px; color: #666; line-height: 1.7; }
   .note { font-size: 11px; color: #aaa; margin-top: 1rem; text-align: center; }
-
-  .scale-nav {
-    display: flex; gap: 4px;
-    background: #eceae8; border-radius: 12px;
-    padding: 5px; margin-bottom: 1.75rem;
-  }
-  .scale-nav-item {
-    flex: 1; text-align: center;
-    padding: 9px 12px; border-radius: 8px;
-    font-size: 13px; font-weight: 600; color: #777;
-    text-decoration: none; transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .scale-nav-item.active { background: #fff; color: #639922; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  .scale-nav-item:not(.active):hover { color: #444; background: rgba(255,255,255,0.45); }
 
   @media (max-width: 600px) {
     .bq-row { grid-template-columns: 1fr; }
     .bq-label { border-right: none; border-bottom: 1px solid #e0e0e0; background: #f0f0ee; }
     .bq-cell { padding: 14px; min-height: 54px; }
+    .care-measure { grid-template-columns: 1fr; gap: 3px; }
+    .care-measure-name { color: #888; font-size: 11px; }
   }
 </style>
 </head>
@@ -195,6 +280,16 @@
     <h1>Escala Downton</h1>
     <p>Valoración de riesgo de caídas en pacientes hospitalizados</p>
   </header>
+
+  <!-- Selector de unidad -->
+  <div class="unit-wrap">
+    <div class="unit-wrap-label">Unidad del paciente</div>
+    <div class="unit-switcher">
+      <button type="button" class="unit-btn" id="unit-adulto" onclick="setUnit('adulto')">Hosp. adulto</button>
+      <button type="button" class="unit-btn" id="unit-pediatria" onclick="setUnit('pediatria')">Pediatría</button>
+      <button type="button" class="unit-btn" id="unit-upcp" onclick="setUnit('upcp')">UPCP</button>
+    </div>
+  </div>
 
   <div class="info-box">
     <strong>Consideraciones pediátricas —</strong> Estado Mental: puntuar como <em>confuso</em> si presenta agitación evidente, irritabilidad extrema o retraso psicomotor; como <em>orientado</em> si el comportamiento es el esperado para su edad. Deambulación: evaluar según edad y contexto clínico; si no puede deambular por edad o condición médica, marcar <em>imposible</em>.
@@ -397,12 +492,17 @@
     </label>
   </div>
 
+  <div id="care-panel" class="care-panel" style="display:none"></div>
+
   <div class="footer">
     <div class="footer-left">
       <span class="total-label">Puntaje total</span>
       <span class="total-score" id="total">—</span>
     </div>
-    <div id="risk-badge" class="risk-badge"></div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div id="risk-badge" class="risk-badge"></div>
+      <button type="button" id="care-btn" class="care-btn" style="display:none" onclick="toggleCare()">Ver plan de cuidados</button>
+    </div>
     <button type="button" class="reset-btn" id="reset-btn">Reiniciar</button>
   </div>
 
@@ -417,11 +517,286 @@
 </div>
 
 <script>
+  // ── Planes de cuidados ──
+  var CARE_PLANS = {
+    adulto: {
+      bajo: {
+        label: 'Riesgo bajo', unit: 'Hospitalización adulto',
+        badgeBg: '#eaf3de', badgeColor: '#3b6d11',
+        measures: [
+          { name: 'Alarma de salida de cama', value: 'No', isNo: true },
+          { name: 'Barandas', value: 'Barandas superiores siempre cerradas en el centro' },
+          { name: 'Levantar asistido', value: 'Primera levantada post operatoria siempre. Según tolerancia se evaluará la necesidad de asistencia en las siguientes levantadas.' },
+          { name: 'Paciente en silla/sillón con sujeción de tórax', value: 'No', isNo: true },
+          { name: 'Cuidadora o acompañante 24 horas', value: 'No', isNo: true },
+          { name: 'Señalética de riesgo de caídas', value: 'No', isNo: true },
+          { name: 'Brazalete amarillo de riesgo', value: 'No', isNo: true },
+          { name: 'N° de operadores al levantarse', value: 'Determinar de acuerdo a valoración del paciente' }
+        ]
+      },
+      mediano: {
+        label: 'Riesgo mediano', unit: 'Hospitalización adulto',
+        badgeBg: '#faeeda', badgeColor: '#854f0b',
+        measures: [
+          { name: 'Alarma de salida de cama', value: 'Alarma nivel medio conectada con cable a Central de llamados' },
+          { name: 'Barandas', value: '4 barandas siempre cerradas en el centro' },
+          { name: 'Levantar asistido', value: 'Sí — acompañamiento y supervisión' },
+          { name: 'Paciente en silla/sillón con sujeción de tórax', value: 'No', isNo: true },
+          { name: 'Cuidadora o acompañante 24 horas', value: 'No', isNo: true },
+          { name: 'Señalética de riesgo de caídas', value: 'Señalética amarilla instalada en puerta de habitación' },
+          { name: 'Brazalete amarillo de riesgo', value: 'Sí' },
+          { name: 'N° de operadores al levantarse', value: 'Determinar de acuerdo a valoración del paciente' }
+        ]
+      },
+      alto: {
+        label: 'Alto riesgo', unit: 'Hospitalización adulto',
+        badgeBg: '#fcebeb', badgeColor: '#a32d2d',
+        measures: [
+          { name: 'Alarma de salida de cama', value: 'Alarma nivel Alto conectada con cable a Central de llamados' },
+          { name: 'Barandas', value: '4 barandas siempre cerradas en el centro' },
+          { name: 'Levantar asistido', value: 'Sí — asistencia' },
+          { name: 'Paciente en silla/sillón con sujeción de tórax', value: 'Sí' },
+          { name: 'Cuidadora o acompañante 24 horas', value: 'Sí' },
+          { name: 'Señalética de riesgo de caídas', value: 'Señalética roja instalada en puerta de habitación' },
+          { name: 'Brazalete amarillo de riesgo', value: 'Sí' },
+          { name: 'N° de operadores al levantarse', value: 'Determinar de acuerdo a valoración del paciente' }
+        ]
+      }
+    },
+    pediatria: {
+      bajo: {
+        label: 'Riesgo bajo', unit: 'Pediatría',
+        badgeBg: '#eaf3de', badgeColor: '#3b6d11',
+        measures: [
+          { name: 'Señalética de riesgo de caídas', value: 'No', isNo: true },
+          { name: 'Brazalete amarillo de riesgo', value: 'No', isNo: true }
+        ],
+        general: [
+          'Freno de cama o cuna activo',
+          'Timbre de llamado a mano',
+          'Altura de la cama al mínimo',
+          'Barandas según riesgo y servicio',
+          'Cuidador o acompañante las 24 horas en servicio de Pediatría',
+          'Los pacientes no deben jugar o correr en el borde de la ventana',
+          'Los pacientes no deben saltar en sillón de acompañante',
+          'Mantener habitación sin objetos que pudiesen generar una caída',
+          'Las medidas de prevención de caídas en pacientes pediátricos serán entregadas a los padres en la Guía de acompañamiento al momento de ingresar (Anexo 7)'
+        ]
+      },
+      mediano: {
+        label: 'Riesgo mediano', unit: 'Pediatría',
+        badgeBg: '#faeeda', badgeColor: '#854f0b',
+        measures: [
+          { name: 'Señalética de riesgo de caídas', value: 'Señalética amarilla instalada en puerta de habitación' },
+          { name: 'Brazalete amarillo de riesgo', value: 'Sí' }
+        ],
+        general: [
+          'Freno de cama o cuna activo',
+          'Timbre de llamado a mano',
+          'Altura de la cama al mínimo',
+          'Barandas según riesgo y servicio',
+          'Cuidador o acompañante las 24 horas en servicio de Pediatría',
+          'Los pacientes no deben jugar o correr en el borde de la ventana',
+          'Los pacientes no deben saltar en sillón de acompañante',
+          'Mantener habitación sin objetos que pudiesen generar una caída',
+          'Las medidas de prevención de caídas en pacientes pediátricos serán entregadas a los padres en la Guía de acompañamiento al momento de ingresar (Anexo 7)'
+        ]
+      },
+      alto: {
+        label: 'Alto riesgo', unit: 'Pediatría',
+        badgeBg: '#fcebeb', badgeColor: '#a32d2d',
+        measures: [
+          { name: 'Señalética de riesgo de caídas', value: 'Señalética roja instalada en puerta de habitación' },
+          { name: 'Brazalete amarillo de riesgo', value: 'Sí' }
+        ],
+        general: [
+          'Freno de cama o cuna activo',
+          'Timbre de llamado a mano',
+          'Altura de la cama al mínimo',
+          'Barandas según riesgo y servicio',
+          'Cuidador o acompañante las 24 horas en servicio de Pediatría',
+          'Los pacientes no deben jugar o correr en el borde de la ventana',
+          'Los pacientes no deben saltar en sillón de acompañante',
+          'Mantener habitación sin objetos que pudiesen generar una caída',
+          'Las medidas de prevención de caídas en pacientes pediátricos serán entregadas a los padres en la Guía de acompañamiento al momento de ingresar (Anexo 7)'
+        ]
+      }
+    },
+    upcp: {
+      bajo: {
+        label: 'Riesgo bajo', unit: 'UPCP',
+        badgeBg: '#eaf3de', badgeColor: '#3b6d11',
+        measures: [
+          { name: 'Sujeción pélvica', value: 'No', isNo: true },
+          { name: 'Sujeción de extremidades', value: 'No', isNo: true },
+          { name: 'Señalética de riesgo de caídas', value: 'No', isNo: true },
+          { name: 'Brazalete amarillo de riesgo', value: 'No', isNo: true }
+        ],
+        general: [
+          'Alarma prioritaria en monitor ante desconexión de cables de ECG',
+          'Freno de cama activo',
+          'Timbre de llamado a mano de padres o paciente (dependiente de condición)',
+          'Altura de la cama al mínimo',
+          'Uso de nido de contención en RN y lactantes menores de 6 meses para evitar desplazamiento',
+          'Cuidadora o acompañante (opcional)',
+          'Mantener habitación sin objetos que pudiesen generar una caída',
+          'Las medidas de prevención de caídas en pacientes pediátricos serán entregadas a los padres en la guía de acompañamiento al momento de ingresar'
+        ]
+      },
+      mediano: {
+        label: 'Riesgo mediano', unit: 'UPCP',
+        badgeBg: '#faeeda', badgeColor: '#854f0b',
+        measures: [
+          { name: 'Sujeción pélvica', value: 'Evaluar — según contexto clínico y con indicación médica' },
+          { name: 'Sujeción de extremidades', value: 'No', isNo: true },
+          { name: 'Señalética de riesgo de caídas', value: 'Señalética amarilla instalada en puerta de habitación' },
+          { name: 'Brazalete amarillo de riesgo', value: 'Sí' }
+        ],
+        general: [
+          'Alarma prioritaria en monitor ante desconexión de cables de ECG',
+          'Sujeción pélvica: aplicar según contexto (Escala Downton, antecedentes mórbidos, irritabilidad, retraso psicomotor, inquietud, estado de conciencia, uso de sedación), siempre con respaldo de indicación médica',
+          'Presencia de señalética que identifica el riesgo de caídas',
+          'Freno de cama activo',
+          'Timbre de llamado a mano de padres o paciente (dependiente de condición)',
+          'Altura de la cama al mínimo',
+          'Uso de nido de contención en RN y lactantes menores de 6 meses para evitar desplazamiento',
+          'Cuidadora o acompañante (opcional)',
+          'Mantener habitación sin objetos que pudiesen generar una caída',
+          'Las medidas de prevención de caídas en pacientes pediátricos serán entregadas a los padres en la guía de acompañamiento al momento de ingresar'
+        ]
+      },
+      alto: {
+        label: 'Alto riesgo', unit: 'UPCP',
+        badgeBg: '#fcebeb', badgeColor: '#a32d2d',
+        measures: [
+          { name: 'Sujeción pélvica', value: 'Evaluar — según contexto clínico y con indicación médica' },
+          { name: 'Sujeción de extremidades', value: 'Evaluar — según contexto clínico' },
+          { name: 'Señalética de riesgo de caídas', value: 'Señalética roja instalada en puerta de habitación' },
+          { name: 'Brazalete amarillo de riesgo', value: 'Sí' }
+        ],
+        general: [
+          'Alarma prioritaria en monitor ante desconexión de cables de ECG',
+          'Sujeción pélvica: aplicar según contexto (Escala Downton, antecedentes mórbidos, irritabilidad, retraso psicomotor, inquietud, estado de conciencia, uso de sedación), siempre con respaldo de indicación médica',
+          'Presencia de señalética que identifica el riesgo de caídas',
+          'Freno de cama activo',
+          'Timbre de llamado a mano de padres o paciente (dependiente de condición)',
+          'Altura de la cama al mínimo',
+          'Uso de nido de contención en RN y lactantes menores de 6 meses para evitar desplazamiento',
+          'Cuidadora o acompañante (opcional)',
+          'Mantener habitación sin objetos que pudiesen generar una caída',
+          'Las medidas de prevención de caídas en pacientes pediátricos serán entregadas a los padres en la guía de acompañamiento al momento de ingresar'
+        ]
+      }
+    }
+  };
+
   var form = document.getElementById('dt-form');
   var RADIO_GROUPS = ['caidas', 'mental', 'deambulacion'];
   var CB_GROUPS = ['medicamentos', 'sensorial'];
+  var currentUnit = null;
+  var currentRisk = null;
+  var careOpen = false;
 
-  // Checkbox mutual-exclusivity with "Ninguno"
+  // ── Selector de unidad ──
+  function setUnit(unit) {
+    currentUnit = unit;
+    var units = ['adulto', 'pediatria', 'upcp'];
+    for (var i = 0; i < units.length; i++) {
+      document.getElementById('unit-' + units[i]).classList.toggle('active', units[i] === unit);
+    }
+    updateCareBtn();
+    if (careOpen && currentRisk) {
+      document.getElementById('care-panel').innerHTML = buildCarePanel(currentUnit, currentRisk);
+    }
+  }
+
+  function updateCareBtn() {
+    var btn = document.getElementById('care-btn');
+    btn.style.display = (currentRisk && currentUnit) ? 'inline-block' : 'none';
+  }
+
+  // ── Construir panel ──
+  function buildCarePanel(unit, risk) {
+    var plan = CARE_PLANS[unit][risk];
+    var isAdulto = unit === 'adulto';
+
+    var html = '<div class="care-panel-header">'
+      + '<h2>Plan de prevención de caídas</h2>'
+      + '<span class="care-panel-unit">' + plan.unit + '</span>'
+      + '<span class="care-panel-badge" style="background:' + plan.badgeBg + ';color:' + plan.badgeColor + '">' + plan.label + '</span>'
+      + '<button type="button" class="copy-btn" onclick="copyCarePlan()">Copiar</button>'
+      + '</div>';
+
+    // Medidas específicas
+    html += '<div class="care-section"><div class="care-section-title">Medidas de prevención de caídas</div>';
+    for (var i = 0; i < plan.measures.length; i++) {
+      var m = plan.measures[i];
+      html += '<div class="care-measure">'
+        + '<div class="care-measure-name">' + m.name + '</div>'
+        + '<div class="care-measure-value' + (m.isNo ? ' no' : '') + '">' + m.value + '</div>'
+        + '</div>';
+    }
+    html += '</div>';
+
+    // Medidas generales (solo ped/upcp)
+    if (!isAdulto && plan.general) {
+      html += '<div class="care-section"><div class="care-section-title">Medidas generales</div>'
+        + '<ul class="care-bullets">';
+      for (var j = 0; j < plan.general.length; j++) {
+        html += '<li>' + plan.general[j] + '</li>';
+      }
+      html += '</ul></div>';
+    }
+
+    return html;
+  }
+
+  // ── Copiar como texto ──
+  function copyCarePlan() {
+    var plan = CARE_PLANS[currentUnit][currentRisk];
+    var lines = ['Plan de prevención de caídas — ' + plan.unit + ' — ' + plan.label, ''];
+
+    lines.push('Medidas de prevención de caídas');
+    for (var i = 0; i < plan.measures.length; i++) {
+      lines.push('· ' + plan.measures[i].name + ': ' + plan.measures[i].value);
+    }
+
+    if (plan.general) {
+      lines.push('');
+      lines.push('Medidas generales');
+      for (var j = 0; j < plan.general.length; j++) {
+        lines.push('· ' + plan.general[j]);
+      }
+    }
+
+    navigator.clipboard.writeText(lines.join('\n')).then(function() {
+      var btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copiado ✓';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copiar';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // ── Mostrar/ocultar panel ──
+  function toggleCare() {
+    var panel = document.getElementById('care-panel');
+    var btn = document.getElementById('care-btn');
+    careOpen = !careOpen;
+    if (careOpen && currentRisk && currentUnit) {
+      panel.innerHTML = buildCarePanel(currentUnit, currentRisk);
+      panel.style.display = 'block';
+      btn.textContent = 'Ocultar plan de cuidados';
+    } else {
+      panel.style.display = 'none';
+      btn.textContent = 'Ver plan de cuidados';
+      careOpen = false;
+    }
+  }
+
+  // ── Lógica de checkboxes ──
   form.addEventListener('change', function(e) {
     var inp = e.target;
     if (inp.type !== 'checkbox') { recompute(); return; }
@@ -454,7 +829,6 @@
     var total = 0;
     var answered = 0;
 
-    // Radio groups
     for (var r = 0; r < RADIO_GROUPS.length; r++) {
       var inp = form.querySelector('input[name="' + RADIO_GROUPS[r] + '"]:checked');
       if (inp) {
@@ -463,8 +837,6 @@
         answered++;
       }
     }
-
-    // Checkbox groups
     for (var c = 0; c < CB_GROUPS.length; c++) {
       var checked = form.querySelectorAll('input[type=checkbox][name="' + CB_GROUPS[c] + '"]:checked');
       if (checked.length > 0) {
@@ -476,7 +848,6 @@
       }
     }
 
-    // Override
     var checkedOverrides = document.querySelectorAll('.override-cell input:checked');
     for (var j = 0; j < checkedOverrides.length; j++) {
       checkedOverrides[j].closest('.override-cell').classList.add('selected');
@@ -485,40 +856,58 @@
 
     var totalEl = document.getElementById('total');
     var badge = document.getElementById('risk-badge');
-    var totalDomains = RADIO_GROUPS.length + CB_GROUPS.length;
-    var faltan = totalDomains - answered;
+    var faltan = RADIO_GROUPS.length + CB_GROUPS.length - answered;
 
     totalEl.textContent = answered > 0 ? total : '—';
     badge.style.display = (answered > 0 || hasOverride) ? 'inline-block' : 'none';
 
+    var newRisk = null;
+
     if (hasOverride) {
+      newRisk = 'alto';
       badge.textContent = 'Alto riesgo';
       badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
-      return;
-    }
-
-    if (faltan > 0) {
+    } else if (faltan > 0) {
       badge.textContent = 'Faltan ' + faltan + (faltan === 1 ? ' ítem' : ' ítems');
       badge.style.background = '#f0f0ee'; badge.style.color = '#888';
-      return;
+    } else {
+      if (total === 0) {
+        newRisk = 'bajo';
+        badge.textContent = 'Riesgo bajo';
+        badge.style.background = '#eaf3de'; badge.style.color = '#3b6d11';
+      } else if (total <= 2) {
+        newRisk = 'mediano';
+        badge.textContent = 'Riesgo mediano';
+        badge.style.background = '#faeeda'; badge.style.color = '#854f0b';
+      } else {
+        newRisk = 'alto';
+        badge.textContent = 'Alto riesgo';
+        badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
+      }
     }
 
-    if (total === 0) {
-      badge.textContent = 'Riesgo bajo';
-      badge.style.background = '#eaf3de'; badge.style.color = '#3b6d11';
-    } else if (total <= 2) {
-      badge.textContent = 'Riesgo mediano';
-      badge.style.background = '#faeeda'; badge.style.color = '#854f0b';
-    } else {
-      badge.textContent = 'Alto riesgo';
-      badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
+    if (newRisk !== currentRisk) {
+      currentRisk = newRisk;
+      if (careOpen && currentUnit && currentRisk) {
+        document.getElementById('care-panel').innerHTML = buildCarePanel(currentUnit, currentRisk);
+      } else if (!currentRisk) {
+        document.getElementById('care-panel').style.display = 'none';
+        document.getElementById('care-btn').textContent = 'Ver plan de cuidados';
+        careOpen = false;
+      }
     }
+
+    updateCareBtn();
   }
 
   document.getElementById('reset-btn').addEventListener('click', function() {
     form.reset();
     var oInps = document.querySelectorAll('.override-cell input');
     for (var i = 0; i < oInps.length; i++) oInps[i].checked = false;
+    document.getElementById('care-panel').style.display = 'none';
+    document.getElementById('care-btn').textContent = 'Ver plan de cuidados';
+    careOpen = false;
+    currentRisk = null;
     recompute();
   });
 </script>
