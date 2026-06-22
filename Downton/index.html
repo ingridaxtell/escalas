@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala Downton — Riesgo de Caídas</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+  }
+  .container { max-width: 860px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 1.25rem; }
+  header h1 { font-size: 21px; font-weight: 600; color: #639922; }
+  header p { font-size: 12px; color: #888; margin-top: 4px; }
+
+  .bq-row {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .bq-label {
+    background: #f9f9f7;
+    padding: 14px;
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 1px solid #e0e0e0;
+  }
+  .bq-label-name { font-weight: 600; font-size: 13px; color: #1a1a1a; line-height: 1.35; }
+  .bq-label-desc { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
+  .bq-options { display: grid; }
+
+  .bq-cell {
+    position: relative;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(99,153,34,0.1);
+  }
+  .bq-cell:last-child { border-bottom: none; }
+  .bq-cell input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+  .bq-cell:hover { background: #f5f9ee; }
+  .bq-cell.selected { background: #eaf3de; }
+
+  .bq-score {
+    flex-shrink: 0;
+    display: inline-block; font-size: 11px; font-weight: 600;
+    border-radius: 99px; padding: 3px 10px;
+    background: #f0f0ee; color: #888;
+    min-width: 48px; text-align: center;
+  }
+  .bq-cell.selected .bq-score { background: #639922; color: #fff; }
+  .bq-cell-title { flex: 1; font-size: 13px; color: #1a1a1a; }
+
+  .bq-check {
+    flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid #ccc;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: transparent; background: transparent;
+    transition: all 0.15s;
+  }
+  .bq-cell.is-cb .bq-check { border-radius: 5px; }
+  .bq-cell.selected .bq-check { background: #639922; border-color: #639922; color: #fff; }
+
+  /* Override panel */
+  .override-panel {
+    border: 1px solid #f0c8a0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  .override-header {
+    background: #fdf2e8;
+    padding: 10px 14px;
+    font-size: 11px; font-weight: 600; color: #7a4000;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #f0c8a0;
+  }
+  .override-cell {
+    position: relative;
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid #f8ece0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(180,80,0,0.1);
+  }
+  .override-cell:last-child { border-bottom: none; }
+  .override-cell input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+  .override-cell:hover { background: #fdf7f0; }
+  .override-cell.selected { background: #fdeede; }
+  .override-check {
+    flex-shrink: 0;
+    width: 20px; height: 20px; border-radius: 4px;
+    border: 1.5px solid #d0a878;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: transparent; background: transparent;
+    transition: all 0.15s;
+  }
+  .override-cell.selected .override-check { background: #c05010; border-color: #c05010; color: #fff; }
+  .override-cell-text { font-size: 12.5px; color: #444; flex: 1; }
+  .override-cell.selected .override-cell-text { color: #8a2800; font-weight: 500; }
+
+  /* Info box */
+  .info-box {
+    background: #eef4fb;
+    border: 1px solid #c0d8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px; color: #1a4070;
+    line-height: 1.55;
+    margin-bottom: 1rem;
+  }
+  .info-box strong { color: #0f2d55; }
+
+  .footnote {
+    font-size: 11px; color: #777; line-height: 1.55;
+    margin-top: 0.75rem; padding: 10px 14px;
+    background: #fafaf8; border-radius: 6px; border: 1px solid #e8e4dc;
+  }
+
+  .footer {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    margin-top: 1.25rem; padding: 14px 18px;
+    background: #fff; border-radius: 8px; border: 1px solid #e0e0e0;
+    position: sticky; bottom: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .footer-left { display: flex; align-items: baseline; gap: 12px; }
+  .total-label { font-size: 13px; color: #888; }
+  .total-score { font-size: 26px; font-weight: 600; color: #1a1a1a; }
+  .risk-badge { font-size: 12px; font-weight: 600; padding: 5px 16px; border-radius: 99px; display: none; }
+  .reset-btn {
+    font-size: 13px; cursor: pointer; color: #aaa;
+    background: none; border: none; text-decoration: underline;
+    padding: 8px 0; min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #888;
+    margin: 1.25rem 0 0.6rem; padding-bottom: 6px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .legend { margin-top: 0.75rem; font-size: 11px; color: #666; line-height: 1.7; }
+  .note { font-size: 11px; color: #aaa; margin-top: 1rem; text-align: center; }
+
+  .scale-nav {
+    display: flex; gap: 4px;
+    background: #eceae8; border-radius: 12px;
+    padding: 5px; margin-bottom: 1.75rem;
+  }
+  .scale-nav-item {
+    flex: 1; text-align: center;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; color: #777;
+    text-decoration: none; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .scale-nav-item.active { background: #fff; color: #639922; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .scale-nav-item:not(.active):hover { color: #444; background: rgba(255,255,255,0.45); }
+
+  @media (max-width: 600px) {
+    .bq-row { grid-template-columns: 1fr; }
+    .bq-label { border-right: none; border-bottom: 1px solid #e0e0e0; background: #f0f0ee; }
+    .bq-cell { padding: 14px; min-height: 54px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <nav class="scale-nav">
+    <a href="../index.html" class="scale-nav-item">Braden Q</a>
+    <a href="../DIVA/index.html" class="scale-nav-item">DIVA</a>
+    <a href="index.html" class="scale-nav-item active">Downton</a>
+  </nav>
+
+  <header>
+    <h1>Escala Downton</h1>
+    <p>Valoración de riesgo de caídas en pacientes hospitalizados</p>
+  </header>
+
+  <div class="info-box">
+    <strong>Consideraciones pediátricas —</strong> Estado Mental: puntuar como <em>confuso</em> si presenta agitación evidente, irritabilidad extrema o retraso psicomotor; como <em>orientado</em> si el comportamiento es el esperado para su edad. Deambulación: evaluar según edad y contexto clínico; si no puede deambular por edad o condición médica, marcar <em>imposible</em>.
+  </div>
+
+  <div class="section-label">Factores de riesgo</div>
+
+  <form id="dt-form">
+
+    <div class="bq-row">
+      <div class="bq-label">
+        <span class="bq-label-name">Caídas previas</span>
+      </div>
+      <div class="bq-options">
+        <label class="bq-cell">
+          <input type="radio" name="caidas" value="0">
+          <span class="bq-score">0 pts</span>
+          <span class="bq-cell-title">No</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell">
+          <input type="radio" name="caidas" value="1">
+          <span class="bq-score">1 pt</span>
+          <span class="bq-cell-title">Sí</span>
+          <span class="bq-check">✓</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="bq-row">
+      <div class="bq-label">
+        <span class="bq-label-name">Ingesta de Medicamentos</span>
+        <span class="bq-label-desc">Seleccionar todos los presentes</span>
+      </div>
+      <div class="bq-options">
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="medicamentos" value="0" data-excl="true">
+          <span class="bq-score">0 pts</span>
+          <span class="bq-cell-title">Ninguno</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="medicamentos" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Tranquilizantes / Sedantes</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="medicamentos" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Diuréticos</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="medicamentos" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Hipotensores</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="medicamentos" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Anti parkinsonianos</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="medicamentos" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Antidepresivos</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="medicamentos" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Otros medicamentos **</span>
+          <span class="bq-check">✓</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="bq-row">
+      <div class="bq-label">
+        <span class="bq-label-name">Déficit Sensorial</span>
+        <span class="bq-label-desc">Seleccionar todos los presentes</span>
+      </div>
+      <div class="bq-options">
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="sensorial" value="0" data-excl="true">
+          <span class="bq-score">0 pts</span>
+          <span class="bq-cell-title">Ninguno</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="sensorial" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Alteraciones visuales</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="sensorial" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Alteraciones auditivas</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell is-cb">
+          <input type="checkbox" name="sensorial" value="1">
+          <span class="bq-score">+1 pt</span>
+          <span class="bq-cell-title">Extremidades</span>
+          <span class="bq-check">✓</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="bq-row">
+      <div class="bq-label">
+        <span class="bq-label-name">Estado Mental</span>
+      </div>
+      <div class="bq-options">
+        <label class="bq-cell">
+          <input type="radio" name="mental" value="0">
+          <span class="bq-score">0 pts</span>
+          <span class="bq-cell-title">Orientado</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell">
+          <input type="radio" name="mental" value="1">
+          <span class="bq-score">1 pt</span>
+          <span class="bq-cell-title">Confuso</span>
+          <span class="bq-check">✓</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="bq-row">
+      <div class="bq-label">
+        <span class="bq-label-name">Deambulación</span>
+      </div>
+      <div class="bq-options">
+        <label class="bq-cell">
+          <input type="radio" name="deambulacion" value="0">
+          <span class="bq-score">0 pts</span>
+          <span class="bq-cell-title">Normal</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell">
+          <input type="radio" name="deambulacion" value="1">
+          <span class="bq-score">1 pt</span>
+          <span class="bq-cell-title">Segura con ayuda</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell">
+          <input type="radio" name="deambulacion" value="1">
+          <span class="bq-score">1 pt</span>
+          <span class="bq-cell-title">Insegura con ayuda</span>
+          <span class="bq-check">✓</span>
+        </label>
+        <label class="bq-cell">
+          <input type="radio" name="deambulacion" value="1">
+          <span class="bq-score">1 pt</span>
+          <span class="bq-cell-title">Imposible</span>
+          <span class="bq-check">✓</span>
+        </label>
+      </div>
+    </div>
+
+  </form>
+
+  <div class="footnote">
+    <strong>**</strong> Otros medicamentos que incrementan el riesgo de caídas: opiáceos, neurolépticos, antihistamínicos sedantes o de primera generación. No se debe puntuar "otros medicamentos" solo por tener tratamiento farmacológico. Esta categoría hace referencia exclusivamente a fármacos que inciden directamente en el riesgo de caída del paciente.
+  </div>
+
+  <div class="section-label">Criterios de alto riesgo independientes del puntaje</div>
+
+  <div class="override-panel">
+    <div class="override-header">Marcar si aplica — el paciente se clasifica como Alto Riesgo independientemente del puntaje obtenido</div>
+    <label class="override-cell">
+      <input type="checkbox" name="override">
+      <span class="override-check">✓</span>
+      <span class="override-cell-text">Paciente con agitación psicomotora</span>
+    </label>
+    <label class="override-cell">
+      <input type="checkbox" name="override">
+      <span class="override-check">✓</span>
+      <span class="override-cell-text">Post operatorio inmediato u operado hace menos de 6 horas</span>
+    </label>
+    <label class="override-cell">
+      <input type="checkbox" name="override">
+      <span class="override-check">✓</span>
+      <span class="override-cell-text">Mayor de 75 años</span>
+    </label>
+    <label class="override-cell">
+      <input type="checkbox" name="override">
+      <span class="override-check">✓</span>
+      <span class="override-cell-text">Antecedente de convulsión en las últimas 48 horas</span>
+    </label>
+    <label class="override-cell">
+      <input type="checkbox" name="override">
+      <span class="override-check">✓</span>
+      <span class="override-cell-text">Paciente pediátrico menor de 3 años</span>
+    </label>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">
+      <span class="total-label">Puntaje total</span>
+      <span class="total-score" id="total">—</span>
+    </div>
+    <div id="risk-badge" class="risk-badge"></div>
+    <button type="button" class="reset-btn" id="reset-btn">Reiniciar</button>
+  </div>
+
+  <div class="legend">
+    <strong>Interpretación:</strong><br>
+    <span style="color:#3b6d11">●</span> 0 pts — Riesgo bajo<br>
+    <span style="color:#854f0b">●</span> 1–2 pts — Riesgo mediano<br>
+    <span style="color:#a32d2d">●</span> ≥3 pts — Alto riesgo
+  </div>
+  <p class="note">Escala de Downton · J.H. Downton, 1993</p>
+
+</div>
+
+<script>
+  var form = document.getElementById('dt-form');
+  var RADIO_GROUPS = ['caidas', 'mental', 'deambulacion'];
+  var CB_GROUPS = ['medicamentos', 'sensorial'];
+
+  // Checkbox mutual-exclusivity with "Ninguno"
+  form.addEventListener('change', function(e) {
+    var inp = e.target;
+    if (inp.type !== 'checkbox') { recompute(); return; }
+    var name = inp.name;
+    var siblings = form.querySelectorAll('input[type=checkbox][name="' + name + '"]');
+    if (inp.getAttribute('data-excl') === 'true' && inp.checked) {
+      for (var i = 0; i < siblings.length; i++) {
+        if (siblings[i] !== inp) siblings[i].checked = false;
+      }
+    } else if (inp.checked) {
+      var excl = form.querySelector('input[type=checkbox][name="' + name + '"][data-excl="true"]');
+      if (excl) excl.checked = false;
+    }
+    recompute();
+  });
+
+  // Override checkboxes
+  var overrideInputs = document.querySelectorAll('.override-cell input');
+  for (var oi = 0; oi < overrideInputs.length; oi++) {
+    overrideInputs[oi].addEventListener('change', recompute);
+  }
+
+  function recompute() {
+    // Clear visual state
+    var cells = form.querySelectorAll('.bq-cell');
+    for (var i = 0; i < cells.length; i++) cells[i].classList.remove('selected');
+    var oCells = document.querySelectorAll('.override-cell');
+    for (var i = 0; i < oCells.length; i++) oCells[i].classList.remove('selected');
+
+    var total = 0;
+    var answered = 0;
+
+    // Radio groups
+    for (var r = 0; r < RADIO_GROUPS.length; r++) {
+      var inp = form.querySelector('input[name="' + RADIO_GROUPS[r] + '"]:checked');
+      if (inp) {
+        total += parseInt(inp.value, 10);
+        inp.closest('.bq-cell').classList.add('selected');
+        answered++;
+      }
+    }
+
+    // Checkbox groups
+    for (var c = 0; c < CB_GROUPS.length; c++) {
+      var checked = form.querySelectorAll('input[type=checkbox][name="' + CB_GROUPS[c] + '"]:checked');
+      if (checked.length > 0) {
+        answered++;
+        for (var k = 0; k < checked.length; k++) {
+          total += parseInt(checked[k].value, 10);
+          checked[k].closest('.bq-cell').classList.add('selected');
+        }
+      }
+    }
+
+    // Override
+    var checkedOverrides = document.querySelectorAll('.override-cell input:checked');
+    for (var j = 0; j < checkedOverrides.length; j++) {
+      checkedOverrides[j].closest('.override-cell').classList.add('selected');
+    }
+    var hasOverride = checkedOverrides.length > 0;
+
+    var totalEl = document.getElementById('total');
+    var badge = document.getElementById('risk-badge');
+    var totalDomains = RADIO_GROUPS.length + CB_GROUPS.length;
+    var faltan = totalDomains - answered;
+
+    totalEl.textContent = answered > 0 ? total : '—';
+    badge.style.display = (answered > 0 || hasOverride) ? 'inline-block' : 'none';
+
+    if (hasOverride) {
+      badge.textContent = 'Alto riesgo';
+      badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
+      return;
+    }
+
+    if (faltan > 0) {
+      badge.textContent = 'Faltan ' + faltan + (faltan === 1 ? ' ítem' : ' ítems');
+      badge.style.background = '#f0f0ee'; badge.style.color = '#888';
+      return;
+    }
+
+    if (total === 0) {
+      badge.textContent = 'Riesgo bajo';
+      badge.style.background = '#eaf3de'; badge.style.color = '#3b6d11';
+    } else if (total <= 2) {
+      badge.textContent = 'Riesgo mediano';
+      badge.style.background = '#faeeda'; badge.style.color = '#854f0b';
+    } else {
+      badge.textContent = 'Alto riesgo';
+      badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
+    }
+  }
+
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    form.reset();
+    var oInps = document.querySelectorAll('.override-cell input');
+    for (var i = 0; i < oInps.length; i++) oInps[i].checked = false;
+    recompute();
+  });
+</script>
+</body>
+</html>
