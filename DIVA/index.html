@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala DIVA — Acceso Venoso Difícil</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+  }
+  .container { max-width: 860px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 1.25rem; }
+  header h1 { font-size: 21px; font-weight: 600; color: #639922; }
+  header p { font-size: 12px; color: #888; margin-top: 4px; }
+
+  /* Selector de escala */
+  .switcher {
+    display: flex;
+    gap: 6px;
+    background: #ececea;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 0 auto 1.25rem;
+    max-width: 420px;
+  }
+  .switch-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #777;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .switch-btn.active {
+    background: #fff;
+    color: #639922;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .intro {
+    background: #eaf3de;
+    border: 1px solid #cfe3b4;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #3b6d11;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  .intro strong { color: #2e5610; }
+
+  .bq-row {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .bq-label {
+    background: #f9f9f7;
+    padding: 14px;
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 1px solid #e0e0e0;
+  }
+  .bq-label-name { font-weight: 600; font-size: 13px; color: #1a1a1a; line-height: 1.35; }
+  .bq-label-desc { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
+
+  .bq-options { display: grid; }
+
+  .bq-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(99,153,34,0.1);
+  }
+  .bq-cell:last-child { border-bottom: none; }
+  .bq-cell input {
+    position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+  }
+  .bq-cell:hover { background: #f5f9ee; }
+  .bq-cell:active { background: #f5f9ee; }
+  .bq-cell.selected { background: #eaf3de; }
+
+  .bq-score {
+    flex-shrink: 0;
+    display: inline-block; font-size: 11px; font-weight: 600;
+    border-radius: 99px; padding: 3px 11px;
+    background: #f0f0ee; color: #888;
+    min-width: 56px; text-align: center;
+  }
+  .bq-cell.selected .bq-score { background: #639922; color: #fff; }
+  .bq-cell-title { flex: 1; font-size: 13px; color: #1a1a1a; }
+
+  .bq-check {
+    flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid #ccc;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: transparent; background: transparent;
+    transition: all 0.15s;
+  }
+  .bq-cell.selected .bq-check {
+    background: #639922; border-color: #639922; color: #fff;
+  }
+
+  .footer {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    margin-top: 1.25rem; padding: 14px 18px;
+    background: #fff; border-radius: 8px; border: 1px solid #e0e0e0;
+    position: sticky; bottom: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .footer-left { display: flex; align-items: baseline; gap: 12px; }
+  .total-label { font-size: 13px; color: #888; }
+  .total-score { font-size: 26px; font-weight: 600; color: #1a1a1a; }
+  .risk-badge { font-size: 12px; font-weight: 600; padding: 5px 16px; border-radius: 99px; display: none; }
+  .reset-btn {
+    font-size: 13px; cursor: pointer; color: #aaa;
+    background: none; border: none; text-decoration: underline;
+    padding: 8px 0; min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .legend { margin-top: 0.75rem; font-size: 11px; color: #666; line-height: 1.7; }
+  .legend strong { color: #1a1a1a; }
+  .note { font-size: 11px; color: #aaa; margin-top: 1rem; text-align: center; }
+
+  /* ── NAVEGACIÓN ENTRE ESCALAS ── */
+  .scale-nav {
+    display: flex; gap: 4px;
+    background: #eceae8; border-radius: 12px;
+    padding: 5px; margin-bottom: 1.75rem;
+  }
+  .scale-nav-item {
+    flex: 1; text-align: center;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; color: #777;
+    text-decoration: none; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .scale-nav-item.active { background: #fff; color: #639922; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .scale-nav-item:not(.active):hover { color: #444; background: rgba(255,255,255,0.45); }
+
+  @media (max-width: 600px) {
+    .bq-row { grid-template-columns: 1fr; }
+    .bq-label {
+      border-right: none; border-bottom: 1px solid #e0e0e0;
+      background: #f0f0ee;
+    }
+    .bq-cell { padding: 14px; min-height: 54px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <nav class="scale-nav">
+    <a href="../index.html" class="scale-nav-item">Braden Q</a>
+    <a href="index.html" class="scale-nav-item active">DIVA</a>
+  </nav>
+
+  <header>
+    <h1>Escala DIVA</h1>
+    <p>Valoración de acceso venoso periférico difícil</p>
+  </header>
+
+  <div class="switcher">
+    <button type="button" class="switch-btn active" id="btn-ped" onclick="setScale('ped')">Pediátrica (DIVA)</button>
+    <button type="button" class="switch-btn" id="btn-adt" onclick="setScale('adt')">Adulto (EA-DIVA)</button>
+  </div>
+
+  <div class="intro" id="intro"></div>
+
+  <form id="bq-form"></form>
+
+  <div class="footer">
+    <div class="footer-left">
+      <span class="total-label">Puntaje total</span>
+      <span class="total-score" id="total">—</span>
+    </div>
+    <div id="risk-badge" class="risk-badge"></div>
+    <button type="button" class="reset-btn" id="reset-btn">Reiniciar</button>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <p class="note" id="note"></p>
+</div>
+
+<script>
+  // ── Definición de las dos escalas ──
+  var SCALES = {
+    ped: {
+      maxLabel: '10',
+      threshold: 4,
+      intro: '<strong>Escala pediátrica (DIVA).</strong> A mayor puntaje, mayor dificultad prevista para canalizar la vía venosa periférica. Un puntaje de <strong>4 o más</strong> predice acceso venoso difícil y orienta a considerar apoyo adicional (ecoguía, personal con mayor experiencia).',
+      legend: '<strong>Interpretación:</strong><br><span style="color:#3b6d11">●</span> 0–3 pts — Dificultad baja a moderada<br><span style="color:#a32d2d">●</span> ≥4 pts — Predice acceso venoso difícil',
+      note: 'Escala DIVA (Difficult Intravenous Access) · Yen K. et al. 2008',
+      domains: [
+        { name: 'Visibilidad de la vena', options: [
+          { v: 0, t: 'Vena visible (presente)' },
+          { v: 2, t: 'Vena no visible (ausente)' }
+        ]},
+        { name: 'Palpabilidad de la vena', options: [
+          { v: 0, t: 'Vena palpable (presente)' },
+          { v: 2, t: 'Vena no palpable (ausente)' }
+        ]},
+        { name: 'Edad', options: [
+          { v: 3, t: 'Menor de 12 meses' },
+          { v: 1, t: '12 a 35 meses' },
+          { v: 0, t: '36 meses o más' }
+        ]},
+        { name: 'Prematuridad', options: [
+          { v: 3, t: 'Antecedente de prematuridad (presente)' },
+          { v: 0, t: 'Sin prematuridad (ausente)' }
+        ]},
+        { name: 'Tono de piel', options: [
+          { v: 0, t: 'Piel clara' },
+          { v: 1, t: 'Piel oscura' }
+        ]}
+      ]
+    },
+    adt: {
+      maxLabel: '12',
+      threshold: 8,
+      intro: '<strong>Escala adulto (EA-DIVA).</strong> A mayor puntaje, mayor dificultad prevista para la canalización venosa periférica. Cada criterio suma sus puntos solo si está presente. Un puntaje <strong>≥ 8</strong> sugiere alta probabilidad de dificultad y orienta a considerar evaluación por equipo especializado o técnica ecoguiada.',
+      legend: '<strong>Interpretación:</strong><br><span style="color:#3b6d11">●</span> 0–7 pts — Dificultad baja a moderada<br><span style="color:#a32d2d">●</span> ≥8 pts — Alta probabilidad de acceso venoso difícil',
+      note: 'Escala EA-DIVA (Estimation of Adult Difficult Intravenous Access)',
+      domains: [
+        { name: 'Historia previa de DIVA', desc: 'Dificultad de canulación venosa periférica', options: [
+          { v: 3, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]},
+        { name: 'Agotamiento vascular', desc: 'Uso de QMT, drogas EV, punciones previas', options: [
+          { v: 2, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]},
+        { name: 'Trastorno de coagulación', desc: 'O uso de anticoagulantes / antiagregantes plaquetarios', options: [
+          { v: 1, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]},
+        { name: 'Enfermedad neurovascular', desc: 'Vasculopatía o neuropatía periférica', options: [
+          { v: 1, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]},
+        { name: 'Examen clínico de la piel', desc: 'Piel oscura, gruesa, fina o frágil', options: [
+          { v: 1, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]},
+        { name: 'Sobrepeso', desc: 'IMC > 25', options: [
+          { v: 1, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]},
+        { name: 'Evaluación venosa', desc: 'Venas no visibles, no palpables, móviles o tortuosas', options: [
+          { v: 2, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]},
+        { name: 'Disponibilidad unilateral', desc: 'Solo un brazo utilizable', options: [
+          { v: 1, t: 'Presente' },
+          { v: 0, t: 'Ausente' }
+        ]}
+      ]
+    }
+  };
+
+  var form = document.getElementById('bq-form');
+  var current = 'ped';
+
+  function buildScale(key) {
+    var scale = SCALES[key];
+    var html = '';
+    scale.domains.forEach(function(dom, di) {
+      html += '<div class="bq-row" data-domain="d' + di + '">';
+      html += '<div class="bq-label"><span class="bq-label-name">' + dom.name + '</span>';
+      if (dom.desc) html += '<span class="bq-label-desc">' + dom.desc + '</span>';
+      html += '</div><div class="bq-options">';
+      dom.options.forEach(function(opt) {
+        var unit = (opt.v === 1) ? ' pt' : ' pts';
+        html += '<label class="bq-cell">';
+        html += '<input type="radio" name="d' + di + '" value="' + opt.v + '">';
+        html += '<span class="bq-score">' + opt.v + unit + '</span>';
+        html += '<span class="bq-cell-title">' + opt.t + '</span>';
+        html += '<span class="bq-check">✓</span>';
+        html += '</label>';
+      });
+      html += '</div></div>';
+    });
+    form.innerHTML = html;
+
+    document.getElementById('intro').innerHTML = scale.intro;
+    document.getElementById('legend').innerHTML = scale.legend;
+    document.getElementById('note').textContent = scale.note;
+    document.getElementById('total').textContent = '— / ' + scale.maxLabel;
+    document.getElementById('risk-badge').style.display = 'none';
+  }
+
+  function setScale(key) {
+    current = key;
+    document.getElementById('btn-ped').classList.toggle('active', key === 'ped');
+    document.getElementById('btn-adt').classList.toggle('active', key === 'adt');
+    buildScale(key);
+  }
+
+  function recompute() {
+    var scale = SCALES[current];
+    var totalDomains = scale.domains.length;
+    var checked = form.querySelectorAll('input[type=radio]:checked');
+    var labels = form.querySelectorAll('.bq-cell');
+    for (var i = 0; i < labels.length; i++) { labels[i].classList.remove('selected'); }
+
+    var total = 0;
+    for (var j = 0; j < checked.length; j++) {
+      total += parseInt(checked[j].value, 10);
+      checked[j].closest('.bq-cell').classList.add('selected');
+    }
+
+    var totalEl = document.getElementById('total');
+    var badge = document.getElementById('risk-badge');
+
+    // Mostrar siempre el subtotal acumulado
+    totalEl.textContent = total + ' / ' + scale.maxLabel;
+
+    var faltan = totalDomains - checked.length;
+
+    // La interpretación solo se genera cuando TODOS los ítems están evaluados
+    if (faltan > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = 'Faltan ' + faltan + (faltan === 1 ? ' ítem' : ' ítems');
+      badge.style.background = '#f0f0ee';
+      badge.style.color = '#888';
+      return;
+    }
+
+    badge.style.display = 'inline-block';
+    if (total >= scale.threshold) {
+      badge.textContent = 'Acceso venoso difícil';
+      badge.style.background = '#fcebeb'; badge.style.color = '#a32d2d';
+    } else {
+      badge.textContent = 'Dificultad baja-moderada';
+      badge.style.background = '#eaf3de'; badge.style.color = '#3b6d11';
+    }
+  }
+
+  form.addEventListener('change', recompute);
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    form.reset();
+    recompute();
+  });
+
+  // Pediátrica por defecto
+  setScale('ped');
+</script>
+</body>
+</html>
