@@ -44,7 +44,7 @@
     display: flex; flex-direction: column; justify-content: center;
     border-right: 1px solid #e0e0e0;
   }
-  .bq-label-name { font-weight: 600; font-size: 12px; color: #1a1a1a; }
+  .bq-label-name { font-weight: 600; font-size: 12px; color: #3c7c12; }
   .bq-label-desc { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
 
   /* La opción es un <label> nativo: el toque lo maneja el navegador */
@@ -133,6 +133,32 @@
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .note { font-size: 11px; color: #aaa; margin-top: 1.25rem; text-align: center; }
 
+  /* ── NAVEGACIÓN ENTRE ESCALAS ── */
+  .scale-nav {
+    display: flex; gap: 4px;
+    background: #eceae8; border-radius: 12px;
+    padding: 5px; margin-bottom: 1.75rem;
+  }
+  .scale-nav-item {
+    flex: 1; text-align: center;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; color: #777;
+    text-decoration: none; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .scale-nav-item.active { background: #fff; color: #639922; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .scale-nav-item:not(.active):hover { color: #444; background: rgba(255,255,255,0.45); }
+
+  /* ── PROGRESO PASO A PASO ── */
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-track { height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #639922; border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+  .progress-text { font-size: 11px; color: #aaa; margin-top: 5px; text-align: right; }
+  .bq-row.completed .bq-label { background: #f2f8ec; }
+  .bq-row.completed .bq-label-name::after { content: ' ✓'; color: #639922; font-weight: 700; }
+  .bq-row.step-current { border-color: #8dc63f; }
+  .bq-row.step-current .bq-label { background: #f4f9ec; }
+
   /* ── PLAN DE CUIDADOS ── */
   .care-btn {
     font-size: 12px; font-weight: 600; cursor: pointer;
@@ -155,6 +181,15 @@
   }
   .care-panel-header h2 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
   .care-panel-badge { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 99px; }
+  .copy-btn {
+    margin-left: auto; font-size: 12px; font-weight: 600; cursor: pointer;
+    padding: 5px 14px; border-radius: 99px; border: 1.5px solid #ccc;
+    background: #fff; color: #555;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .copy-btn:hover { border-color: #639922; color: #639922; }
+  .copy-btn.copied { border-color: #639922; background: #eaf3de; color: #3b6d11; }
 
   .care-grid {
     display: grid;
@@ -187,12 +222,22 @@
 <body>
 <div class="container">
 
+  <nav class="scale-nav">
+    <a href="index.html" class="scale-nav-item active">Braden Q</a>
+    <a href="DIVA/index.html" class="scale-nav-item">DIVA</a>
+  </nav>
+
   <header>
     <h1>Escala Braden Q</h1>
     <p>Evaluación de riesgo de úlceras por presión en pediatría</p>
   </header>
 
   <form id="bq-form">
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="progress-text" id="prog-text">0 de 7 evaluados</div>
+  </div>
 
   <div class="section-title">Intensidad y duración de la presión</div>
 
@@ -534,6 +579,7 @@
   var form = document.getElementById('bq-form');
   var currentRisk = null;
   var careOpen = false;
+  var domains = ['movilidad', 'actividad', 'percepcion', 'humedad', 'friccion', 'nutricion', 'perfusion'];
 
   var carePlans = {
     bajo: {
@@ -591,6 +637,7 @@
     var html = '<div class="care-panel-header">'
       + '<h2>Plan de prevención de LPP</h2>'
       + '<span class="care-panel-badge" style="background:' + plan.badgeBg + ';color:' + plan.badgeColor + '">' + plan.label + '</span>'
+      + '<button type="button" class="copy-btn" onclick="copyCare()">Copiar</button>'
       + '</div>'
       + '<div class="care-grid">';
     for (var i = 0; i < plan.items.length; i++) {
@@ -610,6 +657,33 @@
     return html;
   }
 
+  function copyCare() {
+    var plan = carePlans[currentRisk];
+    var lines = ['Plan de prevención de LPP — ' + plan.label, ''];
+    for (var i = 0; i < plan.items.length; i++) {
+      var item = plan.items[i];
+      lines.push(item.title);
+      for (var j = 0; j < item.points.length; j++) {
+        lines.push('· ' + item.points[j]);
+      }
+      if (item.notes) {
+        for (var k = 0; k < item.notes.length; k++) {
+          lines.push('  ' + item.notes[k]);
+        }
+      }
+      lines.push('');
+    }
+    navigator.clipboard.writeText(lines.join('\n')).then(function() {
+      var btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copiado ✓';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copiar';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
   function toggleCare() {
     var panel = document.getElementById('care-panel');
     careOpen = !careOpen;
@@ -624,22 +698,39 @@
   }
 
   function recompute() {
-    var checked = form.querySelectorAll('input[type=radio]:checked');
-    var labels = form.querySelectorAll('.bq-cell');
-    for (var i = 0; i < labels.length; i++) { labels[i].classList.remove('selected'); }
+    var cells = form.querySelectorAll('.bq-cell');
+    for (var i = 0; i < cells.length; i++) { cells[i].classList.remove('selected'); }
 
     var total = 0;
-    for (var j = 0; j < checked.length; j++) {
-      total += parseInt(checked[j].value, 10);
-      checked[j].closest('.bq-cell').classList.add('selected');
+    var answeredCount = 0;
+    var firstUnanswered = null;
+
+    for (var d = 0; d < domains.length; d++) {
+      var row = form.querySelector('[data-domain="' + domains[d] + '"]');
+      var input = form.querySelector('input[name="' + domains[d] + '"]:checked');
+      row.classList.remove('completed', 'step-current');
+      if (input) {
+        total += parseInt(input.value, 10);
+        input.closest('.bq-cell').classList.add('selected');
+        row.classList.add('completed');
+        answeredCount++;
+      } else if (!firstUnanswered) {
+        firstUnanswered = row;
+      }
     }
+
+    if (firstUnanswered) { firstUnanswered.classList.add('step-current'); }
+
+    var pct = Math.round(answeredCount / domains.length * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-text').textContent = answeredCount + ' de ' + domains.length + ' evaluados';
 
     var totalEl = document.getElementById('total');
     var badge = document.getElementById('risk-badge');
     var careBtn = document.getElementById('care-btn');
     var carePanel = document.getElementById('care-panel');
 
-    if (checked.length === 0) {
+    if (answeredCount < domains.length) {
       totalEl.textContent = '— / 28';
       badge.style.display = 'none';
       careBtn.style.display = 'none';
@@ -670,13 +761,10 @@
 
     if (newRisk !== currentRisk) {
       currentRisk = newRisk;
-      if (careOpen) {
-        carePanel.innerHTML = buildCarePanel(currentRisk);
-      }
+      if (careOpen) { carePanel.innerHTML = buildCarePanel(currentRisk); }
     }
   }
 
-  // El evento 'change' de los radios es 100% confiable en iPhone/Safari
   form.addEventListener('change', recompute);
 
   document.getElementById('reset-btn').addEventListener('click', function() {
@@ -685,6 +773,8 @@
     document.getElementById('care-btn').textContent = 'Ver plan de cuidados';
     recompute();
   });
+
+  recompute();
 </script>
 </body>
 </html>
