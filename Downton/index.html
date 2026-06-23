@@ -213,6 +213,13 @@
     padding-left: 14px; position: relative; margin-bottom: 3px;
   }
   .care-bullets li::before { content: '·'; position: absolute; left: 4px; color: #aaa; }
+  .care-sub-header {
+    font-size: 12px; font-weight: 600; color: #333;
+    padding-left: 0; margin-top: 8px; margin-bottom: 2px;
+  }
+  .care-sub-header::before { content: none; }
+  .care-sub-item { padding-left: 28px; }
+  .care-sub-item::before { content: '—'; left: 14px; color: #999; }
 
   /* ── MISC ── */
   .info-box {
@@ -572,11 +579,13 @@
           { name: 'Brazalete amarillo de riesgo', value: 'No', isNo: true }
         ],
         general: [
-          'Paciente menor de 3 años: recibir en cuna. Si la familia rechaza la cuna, realizar educación y exigir firma de "Constancia rechazo de cuna en lactantes hospitalizados" (Anexo 5)',
-          'En caso de rechazo de cuna — SIEMPRE utilizar protectores de barandas sin espacios entre ellas; alternativa: cojines maternales',
-          'En caso de rechazo de cuna — Rondas de enfermería: cada 2 horas en el día, cada 3 horas en la noche',
-          'En caso de rechazo de cuna — Refuerzo de educación a padres/cuidadores sobre prevención de caídas',
-          'En caso de rechazo de cuna — Considerar sujeción mecánica pélvica según criterio de enfermera e indicación médica (Anexo 6)',
+          'Paciente menor de 3 años: debe estar en cuna. Si la familia rechaza la cuna, realizar educación y exigir firma de "Constancia rechazo de cuna en lactantes hospitalizados"',
+          { subsection: 'En caso de rechazo de cuna', items: [
+            'SIEMPRE utilizar barandas adicionales altas',
+            'Rondas de enfermería: cada 2 horas en el día, cada 3 horas en la noche',
+            'Refuerzo de educación a padres/cuidadores sobre prevención de caídas en cada turno y dejar registro',
+            'Considerar sujeción mecánica pélvica según criterio de enfermera e indicación médica'
+          ]},
           'Acompañante 24 horas',
           'Levantada asistida siempre',
           'Mantener 4 barandas en máxima altura y cerradas en el centro. En cuna: mantener barandas laterales altas',
@@ -597,11 +606,13 @@
           { name: 'Brazalete amarillo de riesgo', value: 'Sí' }
         ],
         general: [
-          'Paciente menor de 3 años: recibir en cuna. Si la familia rechaza la cuna, realizar educación y exigir firma de "Constancia rechazo de cuna en lactantes hospitalizados" (Anexo 5)',
-          'En caso de rechazo de cuna — SIEMPRE utilizar protectores de barandas sin espacios entre ellas; alternativa: cojines maternales',
-          'En caso de rechazo de cuna — Rondas de enfermería: cada 2 horas en el día, cada 3 horas en la noche',
-          'En caso de rechazo de cuna — Refuerzo de educación a padres/cuidadores sobre prevención de caídas',
-          'En caso de rechazo de cuna — Considerar sujeción mecánica pélvica según criterio de enfermera e indicación médica (Anexo 6)',
+          'Paciente menor de 3 años: debe estar en cuna. Si la familia rechaza la cuna, realizar educación y exigir firma de "Constancia rechazo de cuna en lactantes hospitalizados"',
+          { subsection: 'En caso de rechazo de cuna', items: [
+            'SIEMPRE utilizar barandas adicionales altas',
+            'Rondas de enfermería: cada 2 horas en el día, cada 3 horas en la noche',
+            'Refuerzo de educación a padres/cuidadores sobre prevención de caídas en cada turno y dejar registro',
+            'Considerar sujeción mecánica pélvica según criterio de enfermera e indicación médica'
+          ]},
           'Acompañante 24 horas',
           'Levantada asistida siempre',
           'Mantener 4 barandas en máxima altura y cerradas en el centro. En cuna: mantener barandas laterales altas',
@@ -622,11 +633,13 @@
           { name: 'Brazalete amarillo de riesgo', value: 'Sí' }
         ],
         general: [
-          'Paciente menor de 3 años: recibir en cuna. Si la familia rechaza la cuna, realizar educación y exigir firma de "Constancia rechazo de cuna en lactantes hospitalizados" (Anexo 5)',
-          'En caso de rechazo de cuna — SIEMPRE utilizar protectores de barandas sin espacios entre ellas; alternativa: cojines maternales',
-          'En caso de rechazo de cuna — Rondas de enfermería: cada 2 horas en el día, cada 3 horas en la noche',
-          'En caso de rechazo de cuna — Refuerzo de educación a padres/cuidadores sobre prevención de caídas',
-          'En caso de rechazo de cuna — Considerar sujeción mecánica pélvica según criterio de enfermera e indicación médica (Anexo 6)',
+          'Paciente menor de 3 años: debe estar en cuna. Si la familia rechaza la cuna, realizar educación y exigir firma de "Constancia rechazo de cuna en lactantes hospitalizados"',
+          { subsection: 'En caso de rechazo de cuna', items: [
+            'SIEMPRE utilizar barandas adicionales altas',
+            'Rondas de enfermería: cada 2 horas en el día, cada 3 horas en la noche',
+            'Refuerzo de educación a padres/cuidadores sobre prevención de caídas en cada turno y dejar registro',
+            'Considerar sujeción mecánica pélvica según criterio de enfermera e indicación médica'
+          ]},
           'Acompañante 24 horas',
           'Levantada asistida siempre',
           'Mantener 4 barandas en máxima altura y cerradas en el centro. En cuna: mantener barandas laterales altas',
@@ -761,7 +774,15 @@
       html += '<div class="care-section"><div class="care-section-title">Medidas generales</div>'
         + '<ul class="care-bullets">';
       for (var j = 0; j < plan.general.length; j++) {
-        html += '<li>' + plan.general[j] + '</li>';
+        var gItem = plan.general[j];
+        if (typeof gItem === 'string') {
+          html += '<li>' + gItem + '</li>';
+        } else {
+          html += '<li class="care-sub-header">' + gItem.subsection + '</li>';
+          for (var sk = 0; sk < gItem.items.length; sk++) {
+            html += '<li class="care-sub-item">' + gItem.items[sk] + '</li>';
+          }
+        }
       }
       html += '</ul></div>';
     }
@@ -783,7 +804,15 @@
       lines.push('');
       lines.push('Medidas generales');
       for (var j = 0; j < plan.general.length; j++) {
-        lines.push('· ' + plan.general[j]);
+        var gItem = plan.general[j];
+        if (typeof gItem === 'string') {
+          lines.push('· ' + gItem);
+        } else {
+          lines.push(gItem.subsection);
+          for (var sk = 0; sk < gItem.items.length; sk++) {
+            lines.push('  — ' + gItem.items[sk]);
+          }
+        }
       }
     }
 
