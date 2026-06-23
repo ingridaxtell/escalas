@@ -535,7 +535,7 @@
       <span class="override-check">✓</span>
       <span class="override-cell-text">Post operatorio inmediato u operado hace menos de 6 horas</span>
     </label>
-    <label class="override-cell">
+    <label class="override-cell adult-only">
       <input type="checkbox" name="override">
       <span class="override-check">✓</span>
       <span class="override-cell-text">Mayor de 75 años</span>
@@ -796,6 +796,12 @@
     for (var pn = 0; pn < pedNotes.length; pn++) {
       pedNotes[pn].style.display = unit === 'adulto' ? 'none' : '';
     }
+    var adultOnly = document.querySelectorAll('.adult-only');
+    for (var ao = 0; ao < adultOnly.length; ao++) {
+      var hide = unit !== 'adulto';
+      adultOnly[ao].style.display = hide ? 'none' : '';
+      if (hide) adultOnly[ao].querySelector('input').checked = false;
+    }
     updateCareBtn();
     if (careOpen && currentRisk) {
       document.getElementById('care-panel').innerHTML = buildCarePanel(currentUnit, currentRisk);
@@ -1045,6 +1051,11 @@
     }
     var pedNotes = document.querySelectorAll('.ped-note');
     for (var pn = 0; pn < pedNotes.length; pn++) { pedNotes[pn].style.display = ''; }
+    var adultOnly = document.querySelectorAll('.adult-only');
+    for (var ao = 0; ao < adultOnly.length; ao++) {
+      adultOnly[ao].style.display = '';
+      adultOnly[ao].querySelector('input').checked = false;
+    }
     recompute();
   });
 
