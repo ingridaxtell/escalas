@@ -475,7 +475,7 @@
       </div>
     </div>
 
-    <div class="info-box">
+    <div class="info-box ped-note">
       <strong>Consideraciones pediátricas — Estado Mental:</strong> puntuar como <em>confuso</em> si presenta agitación evidente, irritabilidad extrema o retraso psicomotor; como <em>orientado</em> si el comportamiento es el esperado para su edad.
     </div>
 
@@ -511,7 +511,7 @@
       </div>
     </div>
 
-    <div class="info-box">
+    <div class="info-box ped-note">
       <strong>Consideraciones pediátricas — Deambulación:</strong> evaluar según edad y contexto clínico; si no puede deambular por edad o condición médica, marcar <em>imposible</em>.
     </div>
 
@@ -788,6 +788,10 @@
     document.getElementById('unit-wrap').classList.add('done');
     document.getElementById('dt-form').classList.remove('form-locked');
     document.getElementById('override-panel').classList.remove('form-locked');
+    var pedNotes = document.querySelectorAll('.ped-note');
+    for (var pn = 0; pn < pedNotes.length; pn++) {
+      pedNotes[pn].style.display = unit === 'adulto' ? 'none' : '';
+    }
     updateCareBtn();
     if (careOpen && currentRisk) {
       document.getElementById('care-panel').innerHTML = buildCarePanel(currentUnit, currentRisk);
@@ -1035,6 +1039,8 @@
     for (var i = 0; i < units.length; i++) {
       document.getElementById('unit-' + units[i]).classList.remove('active');
     }
+    var pedNotes = document.querySelectorAll('.ped-note');
+    for (var pn = 0; pn < pedNotes.length; pn++) { pedNotes[pn].style.display = ''; }
     recompute();
   });
 
