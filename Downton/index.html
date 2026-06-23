@@ -215,11 +215,17 @@
   .care-bullets li::before { content: '·'; position: absolute; left: 4px; color: #aaa; }
   .care-sub-header {
     font-size: 12px; font-weight: 600; color: #333;
-    padding-left: 0; margin-top: 8px; margin-bottom: 2px;
+    padding-left: 0; margin-top: 8px; margin-bottom: 4px;
   }
   .care-sub-header::before { content: none; }
-  .care-sub-item { padding-left: 28px; }
-  .care-sub-item::before { content: '—'; left: 14px; color: #999; }
+  .care-sub-wrapper { padding: 0 0 10px 0; list-style: none; }
+  .care-sub-wrapper::before { content: none; }
+  .care-sub-bullets { list-style: none; padding: 0; margin: 0; }
+  .care-sub-bullets li {
+    font-size: 12px; color: #444; line-height: 1.5;
+    padding-left: 28px; position: relative; margin-bottom: 3px;
+  }
+  .care-sub-bullets li::before { content: '—'; position: absolute; left: 14px; color: #999; }
 
   /* ── MISC ── */
   .info-box {
@@ -779,9 +785,11 @@
           html += '<li>' + gItem + '</li>';
         } else {
           html += '<li class="care-sub-header">' + gItem.subsection + '</li>';
+          html += '<li class="care-sub-wrapper"><ul class="care-sub-bullets">';
           for (var sk = 0; sk < gItem.items.length; sk++) {
-            html += '<li class="care-sub-item">' + gItem.items[sk] + '</li>';
+            html += '<li>' + gItem.items[sk] + '</li>';
           }
+          html += '</ul></li>';
         }
       }
       html += '</ul></div>';
