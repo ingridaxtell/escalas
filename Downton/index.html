@@ -297,6 +297,15 @@
   .legend { margin-top: 0.75rem; font-size: 11px; color: #666; line-height: 1.7; }
   .note { font-size: 11px; color: #aaa; margin-top: 1rem; text-align: center; }
 
+  .progress-wrap { margin-bottom: 1rem; }
+  .progress-track { height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #639922; border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+  .progress-text { font-size: 11px; color: #aaa; margin-top: 5px; text-align: right; }
+  .bq-row.completed .bq-label { background: #f2f8ec; }
+  .bq-row.completed .bq-label-name::after { content: ' ✓'; color: #639922; font-weight: 700; }
+  .bq-row.step-current { border-color: #8dc63f; }
+  .bq-row.step-current .bq-label { background: #f4f9ec; }
+
   @media (max-width: 600px) {
     .bq-row { grid-template-columns: 1fr; }
     .bq-label { border-right: none; border-bottom: 1px solid #e0e0e0; background: #f0f0ee; }
@@ -337,9 +346,14 @@
 
   <div class="section-label">Factores de riesgo</div>
 
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="progress-text" id="prog-text">0 de 5 evaluados</div>
+  </div>
+
   <form id="dt-form" class="form-locked">
 
-    <div class="bq-row">
+    <div class="bq-row" data-domain="caidas">
       <div class="bq-label">
         <span class="bq-label-name">Caídas previas</span>
       </div>
@@ -359,7 +373,7 @@
       </div>
     </div>
 
-    <div class="bq-row">
+    <div class="bq-row" data-domain="medicamentos">
       <div class="bq-label">
         <span class="bq-label-name">Ingesta de Medicamentos</span>
         <span class="bq-label-desc">Seleccionar todos los presentes</span>
@@ -410,7 +424,7 @@
       </div>
     </div>
 
-    <div class="bq-row">
+    <div class="bq-row" data-domain="sensorial">
       <div class="bq-label">
         <span class="bq-label-name">Déficit Sensorial</span>
         <span class="bq-label-desc">Seleccionar todos los presentes</span>
@@ -443,7 +457,7 @@
       </div>
     </div>
 
-    <div class="bq-row">
+    <div class="bq-row" data-domain="mental">
       <div class="bq-label">
         <span class="bq-label-name">Estado Mental</span>
       </div>
@@ -463,7 +477,7 @@
       </div>
     </div>
 
-    <div class="bq-row">
+    <div class="bq-row" data-domain="deambulacion">
       <div class="bq-label">
         <span class="bq-label-name">Deambulación</span>
       </div>
@@ -757,6 +771,7 @@
   var form = document.getElementById('dt-form');
   var RADIO_GROUPS = ['caidas', 'mental', 'deambulacion'];
   var CB_GROUPS = ['medicamentos', 'sensorial'];
+  var ALL_GROUPS = ['caidas', 'medicamentos', 'sensorial', 'mental', 'deambulacion'];
   var currentUnit = null;
   var currentRisk = null;
   var careOpen = false;
@@ -933,6 +948,22 @@
       }
     }
 
+    // ── Progreso ──
+    var firstUnans = null;
+    for (var g = 0; g < ALL_GROUPS.length; g++) {
+      var gRow = form.querySelector('[data-domain="' + ALL_GROUPS[g] + '"]');
+      gRow.classList.remove('completed', 'step-current');
+      var gAnswered = form.querySelectorAll('input[name="' + ALL_GROUPS[g] + '"]:checked').length > 0;
+      if (gAnswered) {
+        gRow.classList.add('completed');
+      } else if (!firstUnans) {
+        firstUnans = gRow;
+      }
+    }
+    if (firstUnans) firstUnans.classList.add('step-current');
+    document.getElementById('prog-fill').style.width = Math.round(answered / ALL_GROUPS.length * 100) + '%';
+    document.getElementById('prog-text').textContent = answered + ' de ' + ALL_GROUPS.length + ' evaluados';
+
     var checkedOverrides = document.querySelectorAll('.override-cell input:checked');
     for (var j = 0; j < checkedOverrides.length; j++) {
       checkedOverrides[j].closest('.override-cell').classList.add('selected');
@@ -1004,6 +1035,8 @@
     }
     recompute();
   });
+
+  recompute();
 </script>
 </body>
 </html>

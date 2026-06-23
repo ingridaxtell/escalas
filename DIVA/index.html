@@ -161,6 +161,15 @@
   .scale-nav-item.active { background: #fff; color: #639922; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
   .scale-nav-item:not(.active):hover { color: #444; background: rgba(255,255,255,0.45); }
 
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-track { height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #639922; border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+  .progress-text { font-size: 11px; color: #aaa; margin-top: 5px; text-align: right; }
+  .bq-row.completed .bq-label { background: #f2f8ec; }
+  .bq-row.completed .bq-label-name::after { content: ' ✓'; color: #639922; font-weight: 700; }
+  .bq-row.step-current { border-color: #8dc63f; }
+  .bq-row.step-current .bq-label { background: #f4f9ec; }
+
   @media (max-width: 600px) {
     .bq-row { grid-template-columns: 1fr; }
     .bq-label {
@@ -191,6 +200,11 @@
   </div>
 
   <div class="intro" id="intro"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="progress-text" id="prog-text"></div>
+  </div>
 
   <form id="bq-form"></form>
 
@@ -312,6 +326,7 @@
     document.getElementById('note').textContent = scale.note;
     document.getElementById('total').textContent = '— / ' + scale.maxLabel;
     document.getElementById('risk-badge').style.display = 'none';
+    recompute();
   }
 
   function setScale(key) {
@@ -324,25 +339,37 @@
   function recompute() {
     var scale = SCALES[current];
     var totalDomains = scale.domains.length;
-    var checked = form.querySelectorAll('input[type=radio]:checked');
     var labels = form.querySelectorAll('.bq-cell');
     for (var i = 0; i < labels.length; i++) { labels[i].classList.remove('selected'); }
+    var rows = form.querySelectorAll('.bq-row');
+    for (var i = 0; i < rows.length; i++) { rows[i].classList.remove('completed', 'step-current'); }
 
     var total = 0;
-    for (var j = 0; j < checked.length; j++) {
-      total += parseInt(checked[j].value, 10);
-      checked[j].closest('.bq-cell').classList.add('selected');
+    var answeredCount = 0;
+    var firstUnanswered = null;
+    for (var di = 0; di < totalDomains; di++) {
+      var row = form.querySelector('[data-domain="d' + di + '"]');
+      var inp = form.querySelector('input[name="d' + di + '"]:checked');
+      if (inp) {
+        total += parseInt(inp.value, 10);
+        inp.closest('.bq-cell').classList.add('selected');
+        row.classList.add('completed');
+        answeredCount++;
+      } else if (!firstUnanswered) {
+        firstUnanswered = row;
+      }
     }
+    if (firstUnanswered) firstUnanswered.classList.add('step-current');
+    document.getElementById('prog-fill').style.width = Math.round(answeredCount / totalDomains * 100) + '%';
+    document.getElementById('prog-text').textContent = answeredCount + ' de ' + totalDomains + ' evaluados';
 
     var totalEl = document.getElementById('total');
     var badge = document.getElementById('risk-badge');
 
-    // Mostrar siempre el subtotal acumulado
     totalEl.textContent = total + ' / ' + scale.maxLabel;
 
-    var faltan = totalDomains - checked.length;
+    var faltan = totalDomains - answeredCount;
 
-    // La interpretación solo se genera cuando TODOS los ítems están evaluados
     if (faltan > 0) {
       badge.style.display = 'inline-block';
       badge.textContent = 'Faltan ' + faltan + (faltan === 1 ? ' ítem' : ' ítems');
